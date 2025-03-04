@@ -17,13 +17,13 @@ const Register = () => {
       navigate('/login');
     } catch (error) {
       console.error('Registration failed:', error);
-      setError(error.response?.data?.message || 'Registration failed. Please try again.');
+      setError(error.response?.data?.message || 'Error en el registro. Inténtalo de nuevo.');
     }
   };
 
   return (
     <div className="container">
-      <h2>Register</h2>
+      <h2>Registrarse</h2>
       {error && <p className="error">{error}</p>}
       <form onSubmit={handleRegister}>
         <input
@@ -47,9 +47,9 @@ const Register = () => {
           <option value="user">User</option>
           <option value="admin">Admin</option>
         </select>
-        <button type="submit">Register</button>
+        <button type="submit">Registrarse</button>
       </form>
-      <Link to="/login" className="link">Already have an account? Login</Link>
+      <Link to="/login" className="link">Ya tienes una cuenta? Iniciar sesión</Link>
     </div>
   );
 };

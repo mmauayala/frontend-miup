@@ -1,4 +1,5 @@
 :root {
+  font-size: 125%;
   --dark-green: #1a5d1a;
   --light-green: #3a8f3a;
   --white: #ffffff;
@@ -7,6 +8,7 @@
 }
 
 body {
+  font-size: 1rem;
   font-family: 'Arial', sans-serif;
   background-color: var(--light-gray);
   margin: 0;
@@ -21,9 +23,10 @@ body {
   background-color: var(--white);
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
   width: 100%;
-  max-width: 400px;
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
 }
 
 h2 {

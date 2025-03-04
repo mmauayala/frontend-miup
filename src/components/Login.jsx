@@ -13,11 +13,11 @@ const Login = () => {
     setError('');
     try {
       const userData = await login(username, password);
-      console.log('Login successful, user data:', userData);
+      console.log('Login exitoso, user data:', userData);
       navigate('/dashboard');
     } catch (error) {
-      console.error('Login failed:', error);
-      setError(`Login failed: ${error.message}`);
+      console.error('Login fallido:', error);
+      setError(`Login fallido: ${error.message}`);
     }
   };
 
@@ -42,7 +42,7 @@ const Login = () => {
         />
         <button type="submit">Login</button>
       </form>
-      <Link to="/register" className="link">Don't have an account? Register</Link>
+      <Link to="/register" className="link">No tienes una cuenta? Regístrate</Link>
     </div>
   );
 };
