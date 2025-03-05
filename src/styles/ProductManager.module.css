@@ -1,0 +1,141 @@
+.container {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem;
+  }
+  
+  .formSection {
+    flex: 1;
+    min-width: 300px;
+    background-color: var(--background-color);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .listSection {
+    flex: 2;
+    background-color: var(--background-color);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+  
+  .title {
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+  }
+  
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .inputField {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 1rem;
+    background-color: var(--background-color);
+    color: var(--text-color);
+  }
+  
+  .button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0.75rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 1rem;
+  }
+  
+  .button:hover {
+    background-color: var(--secondary-color);
+  }
+  
+  .productList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .productItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .productItem:last-child {
+    border-bottom: none;
+  }
+  
+  .productInfo {
+    flex: 1;
+  }
+  
+  .productName {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+  
+  .productMeasure {
+    font-size: 0.9rem;
+    color: var(--text-color);
+    opacity: 0.8;
+  }
+  
+  .actionButtons {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .iconButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--primary-color);
+    padding: 0.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .iconButton:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+  
+  .editButton {
+    color: var(--primary-color);
+  }
+  
+  .deleteButton {
+    color: #e53935;
+  }
+  
+  @media (max-width: 768px) {
+    .container {
+      flex-direction: column;
+    }
+  
+    .formSection,
+    .listSection {
+      width: 100%;
+    }
+  }
+  
+  

@@ -1,24 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import {
-  Typography,
-  Box,
-  TextField,
-  Button,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Grid,
-  Paper,
-  Switch,
-  FormControlLabel,
-} from "@mui/material"
+import { TextField } from "@mui/material"
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns"
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider"
 import { DatePicker } from "@mui/x-date-pickers/DatePicker"
 import { getProducts, createPromotion, updatePromotionStatus, getPromotionsList } from "../services/api"
+import styles from "../styles/PromotionsManager.module.css"
 
 const PromotionsManager = () => {
   const [products, setProducts] = useState([])
@@ -99,123 +87,135 @@ const PromotionsManager = () => {
   }
 
   return (
-    <Box sx={{ maxWidth: 800, margin: "auto", padding: 2 }}>
-      <Typography variant="h4" gutterBottom>
-        Promotion Manager
-      </Typography>
-      <Paper elevation={3} sx={{ padding: 2, marginBottom: 2 }}>
-        <form onSubmit={handleSubmit}>
-          <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 2 }}>
-            <Box sx={{ gridColumn: "1 / 3" }}>
-              <TextField
-                fullWidth
-                label="Nombre de Promocion"
-                name="nombre"
-                value={formData.nombre}
-                onChange={handleInputChange}
-                required
+    <div className={styles.container}>
+      <h2 className={styles.title}>Gestor de Promociones</h2>
+      <div className={styles.formContainer}>
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+            <label className={styles.label}>Nombre de Promocion</label>
+            <input
+              type="text"
+              name="nombre"
+              value={formData.nombre}
+              onChange={handleInputChange}
+              className={styles.input}
+              required
+            />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Tipo</label>
+            <select name="tipo" value={formData.tipo} onChange={handleInputChange} className={styles.select} required>
+              <option value="CANTIDAD">Cantidad</option>
+              <option value="PORCENTAJE">Porcentaje</option>
+            </select>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Cantidad Requerida</label>
+            <input
+              type="number"
+              name="cantidadRequerida"
+              value={formData.cantidadRequerida}
+              onChange={handleInputChange}
+              className={styles.input}
+              required
+              min="1"
+              step="1"
+            />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Cantidad Bonificada</label>
+            <input
+              type="number"
+              name="cantidadBonificada"
+              value={formData.cantidadBonificada}
+              onChange={handleInputChange}
+              className={styles.input}
+              required
+              min="1"
+              step="1"
+            />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Valor</label>
+            <input
+              type="number"
+              name="valor"
+              value={formData.valor}
+              onChange={handleInputChange}
+              className={styles.input}
+              min="0"
+              step="0.01"
+            />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Fecha de Expiracion</label>
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <DatePicker
+                value={formData.fechaFin}
+                onChange={handleDateChange}
+                renderInput={(params) => <TextField {...params} className={styles.datePicker} required />}
               />
-            </Box>
-            <Box sx={{ gridColumn: "1 / 2" }}>
-              <FormControl fullWidth>
-                <InputLabel>Tipo</InputLabel>
-                <Select name="tipo" value={formData.tipo} onChange={handleInputChange} required>
-                  <MenuItem value="CANTIDAD">Cantidad</MenuItem>
-                  <MenuItem value="PORCENTAJE">Porcentaje</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-            <Box sx={{ gridColumn: "2 / 3" }}>
-              <TextField
-                fullWidth
-                label="Cantidad Requerida"
-                name="cantidadRequerida"
-                type="number"
-                value={formData.cantidadRequerida}
-                onChange={handleInputChange}
-                required
-              />
-            </Box>
-            <Box sx={{ gridColumn: "1 / 2" }}>
-              <TextField
-                fullWidth
-                label="Cantidad Bonificada"
-                name="cantidadBonificada"
-                type="number"
-                value={formData.cantidadBonificada}
-                onChange={handleInputChange}
-                required
-              />
-            </Box>
-            <Box sx={{ gridColumn: "2 / 3" }}>
-              <TextField
-                fullWidth
-                label="Valor"
-                name="valor"
-                type="number"
-                value={formData.valor}
-                onChange={handleInputChange}
-              />
-            </Box>
-            <Box sx={{ gridColumn: "1 / 2" }}>
-              <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DatePicker
-                  label="Fecha de finalización"
-                  value={formData.fechaFin}
-                  onChange={handleDateChange}
-                  renderInput={(params) => <TextField {...params} fullWidth required />}
-                />
-              </LocalizationProvider>
-            </Box>
-            <Box sx={{ gridColumn: "1 / 3" }}>
-              <FormControl fullWidth>
-                <InputLabel>Producto</InputLabel>
-                <Select name="producto" value={formData.producto} onChange={handleInputChange} required>
-                  {products.map((product) => (
-                    <MenuItem key={product.id} value={product.id}>
-                      {product.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Box>
-            <Box sx={{ gridColumn: "1 / 3" }}>
-              <Button type="submit" variant="contained" color="primary">
-                Crear Promocion
-              </Button>
-            </Box>
-          </Box>
+            </LocalizationProvider>
+          </div>
+
+          <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+            <label className={styles.label}>Producto</label>
+            <select
+              name="producto"
+              value={formData.producto}
+              onChange={handleInputChange}
+              className={styles.select}
+              required
+            >
+              <option value="">Seleccionar producto</option>
+              {products.map((product) => (
+                <option key={product.id} value={product.id}>
+                  {product.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+            <button type="submit" className={styles.button}>
+              Crear Promocion
+            </button>
+          </div>
         </form>
-      </Paper>
-      <Typography variant="h5" gutterBottom>
-        Promociones existentes
-      </Typography>
-      {promotions.map((promotion) => (
-        <Paper key={promotion.id} elevation={2} sx={{ padding: 2, marginBottom: 2 }}>
-          <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 2, alignItems: "center" }}>
-            <Box sx={{ gridColumn: "1 / 2" }}>
-              <Typography variant="h6">{promotion.nombre}</Typography>
-              <Typography>Tipo: {promotion.tipo}</Typography>
-              <Typography>Cantidad Requerida: {promotion.cantidadRequerida}</Typography>
-              <Typography>Cantidad Bonificada: {promotion.cantidadBonificada}</Typography>
-              <Typography>Fecha de finalización: {new Date(promotion.fechaFin.join("-")).toLocaleDateString()}</Typography>
-              <Typography>Producto: {promotion.producto}</Typography>
-            </Box>
-            <Box sx={{ gridColumn: "2 / 3" }}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={promotion.activa}
-                    onChange={() => handleStatusChange(promotion.id, promotion.activa)}
-                  />
-                }
-                label={promotion.activa ? "Active" : "Inactive"}
-              />
-            </Box>
-          </Box>
-        </Paper>
-      ))}
-    </Box>
+      </div>
+
+      <h3 className={styles.title}>Promociones Existentes</h3>
+      <div className={styles.promotionsList}>
+        {promotions.map((promotion) => (
+          <div key={promotion.id} className={styles.promotionCard}>
+            <div className={styles.promotionDetails}>
+              <h3>{promotion.nombre}</h3>
+              <p>Tipo: {promotion.tipo}</p>
+              <p>Cantidad Requerida: {promotion.cantidadRequerida}</p>
+              <p>Cantidad Bonificada: {promotion.cantidadBonificada}</p>
+              <p>Fecha de Expiracion: {new Date(promotion.fechaFin.join("-")).toLocaleDateString()}</p>
+              <p>Producto: {promotion.producto}</p>
+            </div>
+            <div className={styles.switchContainer}>
+              <label className={styles.switch}>
+                <input
+                  type="checkbox"
+                  checked={promotion.activa}
+                  onChange={() => handleStatusChange(promotion.id, promotion.activa)}
+                />
+                <span className={styles.slider}></span>
+              </label>
+              <span className={styles.switchLabel}>{promotion.activa ? "Active" : "Inactive"}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   )
 }
 

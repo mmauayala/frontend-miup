@@ -1,23 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Typography,
-  Box,
-  CircularProgress,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-} from "@mui/material"
 import { getWasteHistory, getProducts } from "../services/api"
+import styles from "../styles/WasteHistory.module.css"
 
 const WasteHistory = () => {
   const [wasteHistory, setWasteHistory] = useState([])
@@ -67,64 +52,64 @@ const WasteHistory = () => {
 
   if (error) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
-        <Typography color="error">{error}</Typography>
-      </Box>
+      <div className={styles.container}>
+        <h2 className={styles.title}>Historial de Desperdicio</h2>
+        <div className={styles.errorContainer}>
+          <p className={styles.errorMessage}>{error}</p>
+        </div>
+      </div>
     )
   }
 
   return (
-    <Box sx={{ maxWidth: 800, margin: "auto", padding: 2 }}>
-      <Typography variant="h4" gutterBottom>
-        Historial de Desperdicios
-      </Typography>
-      <FormControl fullWidth sx={{ mb: 2 }}>
-        <InputLabel id="product-select-label">Selecciona el producto</InputLabel>
-        <Select
-          labelId="product-select-label"
-          id="product-select"
+    <div className={styles.container}>
+      <h2 className={styles.title}>Historial de Desperdicio</h2>
+      <div className={styles.selectContainer}>
+        <select
+          className={styles.select}
           value={selectedProduct}
-          label="Selecciona el producto"
           onChange={handleProductChange}
         >
+          <option value="">Selecciona un Producto</option>
           {products.map((product) => (
-            <MenuItem key={product.id} value={product.id}>
+            <option key={product.id} value={product.id}>
               {product.name}
-            </MenuItem>
+            </option>
           ))}
-        </Select>
-      </FormControl>
+        </select>
+      </div>
+      
       {loading ? (
-        <Box display="flex" justifyContent="center" alignItems="center" height="200px">
-          <CircularProgress />
-        </Box>
+        <div className={styles.loadingContainer}>
+          <div className="loading-spinner"></div>
+        </div>
       ) : (
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>ID</TableCell>
-                <TableCell>Producto</TableCell>
-                <TableCell>Fecha de desperdicio</TableCell>
-                <TableCell align="right">Cantidad</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
+        <div className={styles.tableContainer}>
+          <table className={styles.table}>
+            <thead className={styles.tableHeader}>
+              <tr>
+                <th className={styles.tableHeaderCell}>ID</th>
+                <th className={styles.tableHeaderCell}>Producto</th>
+                <th className={styles.tableHeaderCell}>Fecha de Desperdicio</th>
+                <th className={`${styles.tableHeaderCell} ${styles.quantityCell}`}>Cantidad</th>
+              </tr>
+            </thead>
+            <tbody>
               {wasteHistory.map((waste) => (
-                <TableRow key={waste.id}>
-                  <TableCell>{waste.id}</TableCell>
-                  <TableCell>{waste.producto}</TableCell>
-                  <TableCell>
+                <tr key={waste.id} className={styles.tableRow}>
+                  <td className={styles.tableCell}>{waste.id}</td>
+                  <td className={styles.tableCell}>{waste.producto}</td>
+                  <td className={styles.tableCell}>
                     {waste.fechaDesperdicio ? new Date(waste.fechaDesperdicio).toLocaleString() : "N/A"}
-                  </TableCell>
-                  <TableCell align="right">{waste.cantidad}</TableCell>
-                </TableRow>
+                  </td>
+                  <td className={`${styles.tableCell} ${styles.quantityCell}`}>{waste.cantidad}</td>
+                </tr>
               ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+            </tbody>
+          </table>
+        </div>
       )}
-    </Box>
+    </div>
   )
 }
 

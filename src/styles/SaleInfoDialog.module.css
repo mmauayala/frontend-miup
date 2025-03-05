@@ -1,0 +1,120 @@
+.dialog {
+    background-color: var(--background-color);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    max-width: 800px;
+    width: 90%;
+    max-height: 90vh;
+    overflow: hidden;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+  }
+  
+  .dialogOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+  }
+  
+  .dialogTitle {
+    padding: 1.5rem;
+    background-color: var(--primary-color);
+    color: white;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+  }
+  
+  .dialogContent {
+    padding: 1.5rem;
+    overflow-y: auto;
+    max-height: calc(90vh - 130px);
+  }
+  
+  .tableContainer {
+    background-color: var(--background-color);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+  
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .tableHeader {
+    background-color: var(--primary-color);
+    color: white;
+  }
+  
+  .tableHeaderCell {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+  }
+  
+  .tableRow {
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .tableRow:last-child {
+    border-bottom: none;
+  }
+  
+  .tableRow:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+  
+  .tableCell {
+    padding: 0.75rem 1rem;
+  }
+  
+  .totalAmount {
+    text-align: right;
+    font-weight: 600;
+    margin: 1rem 0;
+    font-size: 1.2rem;
+  }
+  
+  .transactionInfo {
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--text-color);
+    opacity: 0.8;
+  }
+  
+  .dialogActions {
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+    border-top: 1px solid var(--border-color);
+  }
+  
+  .closeButton {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .closeButton:hover {
+    background-color: var(--secondary-color);
+  }
+  
+  .rightAlign {
+    text-align: right;
+  }
+  
+  

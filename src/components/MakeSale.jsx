@@ -1,27 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import {
-  Typography,
-  Box,
-  TextField,
-  Button,
-  List,
-  ListItem,
-  ListItemText,
-  IconButton,
-  Paper,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Snackbar,
-  Alert,
-  CircularProgress,
-} from "@mui/material"
-import { Add, Remove, Search, Refresh } from "@mui/icons-material"
+import { Add, Remove, Refresh } from "@mui/icons-material"
 import { getStockList, makeSale, getPromotionsList, getProductIdByName } from "../services/api"
 import SaleInfoDialog from "./SaleInfoDialog"
+import styles from "../styles/MakeSale.module.css"
+
 
 const MakeSale = () => {
   const [products, setProducts] = useState([])
@@ -307,140 +291,118 @@ const MakeSale = () => {
   }
 
   return (
-    <Box sx={{ maxWidth: 1200, margin: "auto", padding: 2 }}>
-      <Typography variant="h4" gutterBottom>
-        REALIZAR VENTA
-      </Typography>
-      <Box sx={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap" }}>
-        <Box sx={{ flexBasis: "60%", marginBottom: 2 }}>
-          <Paper elevation={3} sx={{ padding: 2, marginBottom: 2 }}>
-            <Box sx={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
-              <TextField
-                label="Buscar Productos"
-                variant="outlined"
+    <div className={styles.container}>
+      <h2 className={styles.title}>Hacer Venta</h2>
+      <div className={styles.contentContainer}>
+        <div className={styles.productsSection}>
+          <div className={styles.card}>
+            <div className={styles.searchContainer}>
+              <input
+                type="text"
+                placeholder="Search Products"
                 value={search}
                 onChange={handleSearch}
-                InputAttrs={{
-                  startAdornment: <Search />,
-                }}
+                className={styles.searchInput}
               />
-              <Box sx={{ display: "flex", gap: 2 }}>
-                <FormControl variant="outlined" sx={{ minWidth: 120 }}>
-                  <InputLabel>Ordenar por</InputLabel>
-                  <Select value={sortBy} onChange={handleSortChange} label="Sort By">
-                    <MenuItem value="name">Nombre</MenuItem>
-                    <MenuItem value="price">Precio</MenuItem>
-                    <MenuItem value="promotion">Promocion</MenuItem>
-                  </Select>
-                </FormControl>
-                <IconButton onClick={fetchProducts} disabled={refreshing}>
-                  {refreshing ? <CircularProgress size={24} /> : <Refresh />}
-                </IconButton>
-              </Box>
-            </Box>
-            <List>
+              <div className={styles.sortContainer}>
+                <select value={sortBy} onChange={handleSortChange} className={styles.select}>
+                  <option value="name">Nombre</option>
+                  <option value="price">Precio</option>
+                  <option value="promotion">Promocion</option>
+                </select>
+                <button className={styles.iconButton} onClick={fetchProducts} disabled={refreshing}>
+                  <Refresh />
+                </button>
+              </div>
+            </div>
+            <ul className={styles.productsList}>
               {filteredAndSortedProducts.map((product) => (
-                <ListItem
-                  key={product.id}
-                  secondaryAction={
-                    <IconButton
-                      edge="end"
-                      aria-label="add to cart"
-                      onClick={() => handleAddToCart(product)}
-                      disabled={product.cantidad === 0}
-                    >
-                      <Add />
-                    </IconButton>
-                  }
-                >
-                  <ListItemText
-                    primary={product.producto}
-                    secondary={
-                      <>
-                        <Typography variant="body2" component="span">
-                          Precio: ${product.precioVenta.toFixed(2)} | Stock: {product.cantidad}
-                        </Typography>
-                        {product.cantidad === 0 && (
-                          <Typography variant="body2" component="span" color="error" sx={{ ml: 1 }}>
-                            Fuera de Stock
-                          </Typography>
-                        )}
-                      </>
-                    }
-                  />
-                  {promotions.find((p) => p.producto === product.producto) && (
-                    <Typography variant="body2" color="primary">
-                      Promoción disponible
-                    </Typography>
-                  )}
-                </ListItem>
+                <li key={product.id} className={styles.productItem}>
+                  <div className={styles.productInfo}>
+                    <div className={styles.productName}>{product.producto}</div>
+                    <div className={styles.productDetails}>
+                      Precio: ${product.precioVenta.toFixed(2)} | Stock: {product.cantidad}
+                      {product.cantidad === 0 && <span className={styles.outOfStock}>Fuera de Stock</span>}
+                    </div>
+                    {promotions.find((p) => p.producto === product.producto) && (
+                      <div className={styles.promotionTag}>Promocion Disponible</div>
+                    )}
+                  </div>
+                  <button
+                    className={styles.iconButton}
+                    onClick={() => handleAddToCart(product)}
+                    disabled={product.cantidad === 0}
+                  >
+                    <Add />
+                  </button>
+                </li>
               ))}
-            </List>
-          </Paper>
-        </Box>
-        <Box sx={{ flexBasis: "40%", marginBottom: 2 }}>
-          <Paper elevation={3} sx={{ padding: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              Carrito
-            </Typography>
+            </ul>
+          </div>
+        </div>
+
+        <div className={styles.cartSection}>
+          <div className={styles.card}>
+            <h3 className={styles.cartTitle}>Carrito</h3>
             {Object.keys(cart).length === 0 ? (
-              <Typography variant="body1" sx={{ textAlign: "center", my: 4 }}>
-                Su carrito está vacío. Agregue productos para continuar con el pago.
-              </Typography>
+              <div className={styles.emptyCart}>Su carrito está vacío. Agregue productos para continuar con el pago.</div>
             ) : (
-              <List>
+              <ul className={styles.cartList}>
                 {Object.entries(cart).map(([productId, item]) => (
-                  <ListItem key={productId}>
-                    <ListItemText
-                      primary={item.producto}
-                      secondary={`Precio: $${item.precioVenta.toFixed(2)} | Cantidad: ${item.quantity}`}
-                    />
-                    <Box>
-                      <IconButton onClick={() => handleRemoveFromCart(productId)}>
+                  <li key={productId} className={styles.cartItem}>
+                    <div className={styles.cartItemInfo}>
+                      <div className={styles.cartItemName}>{item.producto}</div>
+                      <div className={styles.cartItemPrice}>
+                        Precio: ${item.precioVenta.toFixed(2)} | Cantidad: {item.quantity}
+                      </div>
+                    </div>
+                    <div className={styles.quantityControls}>
+                      <button className={styles.iconButton} onClick={() => handleRemoveFromCart(productId)}>
                         <Remove />
-                      </IconButton>
-                      <TextField
+                      </button>
+                      <input
                         type="number"
                         value={item.quantity}
                         onChange={(e) => handleQuantityChange(productId, Number.parseInt(e.target.value))}
-                        inputAttrs={{ min: 1, max: item.cantidad }}
-                        sx={{ width: 60 }}
+                        min="1"
+                        max={item.cantidad}
+                        className={styles.quantityInput}
                       />
-                      <IconButton onClick={() => handleAddToCart(item)}>
+                      <button className={styles.iconButton} onClick={() => handleAddToCart(item)}>
                         <Add />
-                      </IconButton>
-                    </Box>
-                  </ListItem>
+                      </button>
+                    </div>
+                  </li>
                 ))}
-              </List>
+              </ul>
             )}
-            <Typography variant="h6" align="right">
-              Total: ${calculateTotal().toFixed(2)}
-            </Typography>
-            <Button
-              variant="contained"
-              color="primary"
-              fullWidth
+            <div className={styles.totalAmount}>Total: ${calculateTotal().toFixed(2)}</div>
+            <button
+              className={styles.checkoutButton}
               onClick={handleCheckout}
               disabled={Object.keys(cart).length === 0 || loading}
-              sx={{ marginTop: 2 }}
             >
-              {loading ? <CircularProgress size={24} color="inherit" /> : "Checkout"}
-            </Button>
-          </Paper>
-        </Box>
-      </Box>
-      <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={() => setSnackbar({ ...snackbar, open: false })}>
-        <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity}>
+              {loading ? "Processing..." : "Checkout"}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {snackbar.open && (
+        <div className={`${styles.alert} ${styles[`${snackbar.severity}Alert`]}`}>
           {snackbar.message}
-        </Alert>
-      </Snackbar>
+          <button className={styles.closeButton} onClick={() => setSnackbar({ ...snackbar, open: false })}>
+            ×
+          </button>
+        </div>
+      )}
+
       <SaleInfoDialog
         open={saleInfoDialog.open}
         onClose={() => setSaleInfoDialog({ ...saleInfoDialog, open: false })}
         saleInfo={saleInfoDialog.saleInfo}
       />
-    </Box>
+    </div>
   )
 }
 

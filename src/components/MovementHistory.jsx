@@ -1,19 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Typography,
-  Box,
-  CircularProgress,
-} from "@mui/material"
 import { getMovementHistory } from "../services/api"
+import styles from "../styles/MovementHistory.module.css"
 
 const MovementHistory = () => {
   const [movements, setMovements] = useState([])
@@ -40,50 +29,52 @@ const MovementHistory = () => {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
-        <CircularProgress />
-      </Box>
+      <div className={styles.container}>
+        <h2 className={styles.title}>Historial de Movimientos</h2>
+        <div className={styles.loadingContainer}>
+          <div className="loading-spinner"></div>
+        </div>
+      </div>
     )
   }
 
   if (error) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
-        <Typography color="error">{error}</Typography>
-      </Box>
+      <div className={styles.container}>
+        <h2 className={styles.title}>Historial de Movimientos</h2>
+        <div className={styles.errorContainer}>
+          <p className={styles.errorMessage}>{error}</p>
+        </div>
+      </div>
     )
   }
 
   return (
-    <Box sx={{ maxWidth: 800, margin: "auto", padding: 2 }}>
-      <Typography variant="h4" gutterBottom>
-        Historia Movimientos
-      </Typography>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Fecha</TableCell>
-              <TableCell align="right">Cantidad</TableCell>
-              <TableCell>Tipo de Movimiento</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
+    <div className={styles.container}>
+      <h2 className={styles.title}>Historial de Movimientos</h2>
+      <div className={styles.tableContainer}>
+        <table className={styles.table}>
+          <thead className={styles.tableHeader}>
+            <tr>
+              <th className={styles.tableHeaderCell}>ID</th>
+              <th className={styles.tableHeaderCell}>Fecha</th>
+              <th className={`${styles.tableHeaderCell} ${styles.quantityCell}`}>Cantidad</th>
+              <th className={styles.tableHeaderCell}>Tipo</th>
+            </tr>
+          </thead>
+          <tbody>
             {movements.map((movement) => (
-              <TableRow key={movement.id}>
-                <TableCell component="th" scope="row">
-                  {movement.id}
-                </TableCell>
-                <TableCell>{new Date(movement.fecha).toLocaleString()}</TableCell>
-                <TableCell align="right">{movement.cantidad}</TableCell>
-                <TableCell>{movement.tipo}</TableCell>
-              </TableRow>
+              <tr key={movement.id} className={styles.tableRow}>
+                <td className={styles.tableCell}>{movement.id}</td>
+                <td className={styles.tableCell}>{new Date(movement.fecha).toLocaleString()}</td>
+                <td className={`${styles.tableCell} ${styles.quantityCell}`}>{movement.cantidad}</td>
+                <td className={`${styles.tableCell} ${styles.typeCell}`}>{movement.tipo}</td>
+              </tr>
             ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Box>
+          </tbody>
+        </table>
+      </div>
+    </div>
   )
 }
 

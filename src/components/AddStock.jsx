@@ -1,21 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import {
-  Typography,
-  Box,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  TextField,
-  Button,
-  Alert,
-  CircularProgress,
-  Paper,
-  Grid,
-} from "@mui/material"
 import { getProducts, addStock } from "../services/api"
+import styles from "../styles/AddStock.module.css"
 
 const AddStock = () => {
   const [products, setProducts] = useState([])
@@ -72,7 +59,7 @@ const AddStock = () => {
 
       const result = await addStock(selectedProduct, stockData)
       setSuccess(
-        `Stock añadido con éxito. Product: ${result.producto}, Cantidad: ${result.cantidad}, Precio de compra: $${result.precioIngreso}, Precio de venta: $${result.precioVenta}`,
+        `Stock añadido con éxito. Producto: ${result.producto}, Cantidad: ${result.cantidad}, Precio de compra: $${result.precioIngreso}, Precio de venta: $${result.precioVenta}`,
       )
       setSelectedProduct("")
       setQuantity("")
@@ -87,89 +74,96 @@ const AddStock = () => {
   }
 
   return (
-    <Box sx={{ maxWidth: 600, margin: "auto", padding: 2 }}>
-      <Typography variant="h4" gutterBottom>
-        AÑADIR STOCK
-      </Typography>
-      <Paper elevation={3} sx={{ padding: 3 }}>
-        <form onSubmit={handleSubmit}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <FormControl fullWidth required>
-                <InputLabel id="product-select-label">Seleccionar producto</InputLabel>
-                <Select
-                  labelId="product-select-label"
-                  id="product-select"
-                  value={selectedProduct}
-                  label="Seleccionar producto"
-                  onChange={handleProductChange}
-                >
-                  {products.map((product) => (
-                    <MenuItem key={product.id} value={product.id}>
-                      {product.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Cantidad"
-                type="number"
-                value={quantity}
-                onChange={handleQuantityChange}
-                required
-                inputAttrs={{ min: 0.01, step: 0.01 }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Precio de compra"
-                type="number"
-                value={purchasePrice}
-                onChange={handlePurchasePriceChange}
-                required
-                inputAttrs={{ min: 0.01, step: 0.01 }}
-                InputAttrs={{
-                  startAdornment: <span>$</span>,
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Precio de venta"
-                type="number"
-                value={salePrice}
-                onChange={handleSalePriceChange}
-                required
-                inputAttrs={{ min: 0.01, step: 0.01 }}
-                InputAttrs={{
-                  startAdornment: <span>$</span>,
-                }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Button type="submit" variant="contained" color="primary" fullWidth disabled={loading} sx={{ mt: 1 }}>
-                {loading ? <CircularProgress size={24} /> : "Agregar Stock"}
-              </Button>
-            </Grid>
-          </Grid>
+    <div className={styles.container}>
+      <h2 className={styles.title}>Añadir Stock</h2>
+      <div className={styles.formContainer}>
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <div className={styles.formGroup}>
+            <label className={styles.label} htmlFor="product-select">
+              Seleccionar Producto
+            </label>
+            <select
+              id="product-select"
+              className={styles.select}
+              value={selectedProduct}
+              onChange={handleProductChange}
+              required
+            >
+              <option value="">Seleccionar Producto</option>
+              {products.map((product) => (
+                <option key={product.id} value={product.id}>
+                  {product.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.label} htmlFor="quantity">
+              Cantidad
+            </label>
+            <input
+              id="quantity"
+              className={styles.input}
+              type="number"
+              value={quantity}
+              onChange={handleQuantityChange}
+              required
+              min="0.01"
+              step="0.01"
+            />
+          </div>
+
+          <div className={styles.pricesContainer}>
+            <div className={styles.formGroup}>
+              <label className={styles.label} htmlFor="purchase-price">
+                Precio de compra
+              </label>
+              <div className={styles.priceInputContainer}>
+                <span className={styles.currencySymbol}>$</span>
+                <input
+                  id="purchase-price"
+                  className={`${styles.input} ${styles.priceInput}`}
+                  type="number"
+                  value={purchasePrice}
+                  onChange={handlePurchasePriceChange}
+                  required
+                  min="0.01"
+                  step="0.01"
+                />
+              </div>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label} htmlFor="sale-price">
+                Precio de venta
+              </label>
+              <div className={styles.priceInputContainer}>
+                <span className={styles.currencySymbol}>$</span>
+                <input
+                  id="sale-price"
+                  className={`${styles.input} ${styles.priceInput}`}
+                  type="number"
+                  value={salePrice}
+                  onChange={handleSalePriceChange}
+                  required
+                  min="0.01"
+                  step="0.01"
+                />
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" className={styles.button} disabled={loading}>
+            {loading ? "Procesando..." : "Añadir Stock"}
+          </button>
         </form>
-        {error && (
-          <Alert severity="error" sx={{ mt: 2 }}>
-            {error}
-          </Alert>
-        )}
-        {success && (
-          <Alert severity="success" sx={{ mt: 2 }}>
-            {success}
-          </Alert>
-        )}
-      </Paper>
-    </Box>
+
+        {error && <div className={`${styles.alert} ${styles.errorAlert}`}>{error}</div>}
+
+        {success && <div className={`${styles.alert} ${styles.successAlert}`}>{success}</div>}
+      </div>
+    </div>
   )
 }
 

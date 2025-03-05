@@ -1,9 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { TextField, Button, List, ListItem, ListItemText, IconButton, Typography, Box } from "@mui/material"
 import { Edit, Delete } from "@mui/icons-material"
 import { getProducts, createProduct, updateProduct, deleteProduct } from "../services/api"
+import styles from "../styles/ProductManager.module.css"
 
 const ProductManager = () => {
   const [products, setProducts] = useState([])
@@ -20,7 +20,7 @@ const ProductManager = () => {
       const fetchedProducts = await getProducts()
       setProducts(fetchedProducts)
     } catch (error) {
-      console.error("Error fetching products:", error)
+      console.error("Error al obtener los productos:", error)
     }
   }
 
@@ -38,7 +38,7 @@ const ProductManager = () => {
       setName("")
       setMedida("")
     } catch (error) {
-      console.error("Error submitting product:", error)
+      console.error("Error al enviar el producto:", error)
     }
   }
 
@@ -58,51 +58,80 @@ const ProductManager = () => {
   }
 
   return (
-    <Box sx={{ maxWidth: 600, margin: "auto", padding: 2 }}>
-      <Typography variant="h4" gutterBottom>
-        Product Manager
-      </Typography>
-      <form onSubmit={handleSubmit}>
-        <TextField
-          label="Product Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          fullWidth
-          margin="normal"
-          required
-        />
-        <TextField
-          label="Measure"
-          value={medida}
-          onChange={(e) => setMedida(e.target.value)}
-          fullWidth
-          margin="normal"
-          required
-        />
-        <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>
-          {editingId ? "Update Product" : "Add Product"}
-        </Button>
-      </form>
-      <List sx={{ mt: 4 }}>
-        {products.map((product) => (
-          <ListItem
-            key={product.id}
-            secondaryAction={
-              <>
-                <IconButton edge="end" aria-label="edit" onClick={() => handleEdit(product)}>
-                  <Edit />
-                </IconButton>
-                <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(product.id)}>
-                  <Delete />
-                </IconButton>
-              </>
-            }
-          >
-            <ListItemText primary={product.name} secondary={`Measure: ${product.medida}`} />
-          </ListItem>
-        ))}
-      </List>
-    </Box>
+    <div className={styles.container}>
+      <div className={styles.formSection}>
+        <h2 className={styles.title}>{editingId ? "Editar Producto" : "Añadir Nuevo Product"}</h2>
+        <form className={styles.form} onSubmit={handleSubmit}>
+          <input
+            type="text"
+            className={styles.inputField}
+            placeholder="Nombre del producto"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+          <input
+            type="text"
+            className={styles.inputField}
+            placeholder="Medida (ej. g., kg, unidad)"
+            value={medida}
+            onChange={(e) => setMedida(e.target.value)}
+            required
+          />
+          <button type="submit" className={styles.button}>
+            {editingId ? "Editar Producto" : "Añadir Producto"}
+          </button>
+          {editingId && (
+            <button
+              type="button"
+              className={styles.button}
+              onClick={() => {
+                setEditingId(null)
+                setName("")
+                setMedida("")
+              }}
+              style={{ backgroundColor: "#6c757d" }}
+            >
+              Cancel
+            </button>
+          )}
+        </form>
+      </div>
+
+      <div className={styles.listSection}>
+        <h2 className={styles.title}>Lista de Productos</h2>
+        {products.length === 0 ? (
+          <p>No se encontraron productos. Agrega tu primer producto!</p>
+        ) : (
+          <ul className={styles.productList}>
+            {products.map((product) => (
+              <li key={product.id} className={styles.productItem}>
+                <div className={styles.productInfo}>
+                  <div className={styles.productName}>{product.name}</div>
+                  <div className={styles.productMeasure}>Medida: {product.medida}</div>
+                </div>
+                <div className={styles.actionButtons}>
+                  <button
+                    className={`${styles.iconButton} ${styles.editButton}`}
+                    onClick={() => handleEdit(product)}
+                    aria-label="Editar producto"
+                  >
+                    <Edit />
+                  </button>
+                  <button
+                    className={`${styles.iconButton} ${styles.deleteButton}`}
+                    onClick={() => handleDelete(product.id)}
+                    aria-label="Borrar producto"
+                  >
+                    <Delete />
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
   )
 }
 

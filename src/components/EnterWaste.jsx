@@ -1,19 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import {
-  Typography,
-  Box,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  TextField,
-  Button,
-  Alert,
-  CircularProgress,
-} from "@mui/material"
 import { getProducts, enterWaste } from "../services/api"
+import styles from "../styles/EnterWaste.module.css"
 
 const EnterWaste = () => {
   const [products, setProducts] = useState([])
@@ -65,53 +54,56 @@ const EnterWaste = () => {
   }
 
   return (
-    <Box sx={{ maxWidth: 400, margin: "auto", padding: 2 }}>
-      <Typography variant="h4" gutterBottom>
-        INGRESAR DESPERDICIO
-      </Typography>
-      <form onSubmit={handleSubmit}>
-        <FormControl fullWidth sx={{ mb: 2 }}>
-          <InputLabel id="product-select-label">Seleccionar Producto</InputLabel>
-          <Select
-            labelId="product-select-label"
-            id="product-select"
-            value={selectedProduct}
-            label="Seleccionar Producto"
-            onChange={handleProductChange}
-            required
-          >
-            {products.map((product) => (
-              <MenuItem key={product.id} value={product.id}>
-                {product.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <TextField
-          fullWidth
-          label="Cantidad"
-          type="number"
-          value={quantity}
-          onChange={handleQuantityChange}
-          sx={{ mb: 2 }}
-          required
-          inputAttrs={{ min: 0, step: 0.01 }}
-        />
-        <Button type="submit" variant="contained" color="primary" fullWidth disabled={loading}>
-          {loading ? <CircularProgress size={24} /> : "Enter Waste"}
-        </Button>
-      </form>
-      {error && (
-        <Alert severity="error" sx={{ mt: 2 }}>
-          {error}
-        </Alert>
-      )}
-      {success && (
-        <Alert severity="success" sx={{ mt: 2 }}>
-          {success}
-        </Alert>
-      )}
-    </Box>
+    <div className={styles.container}>
+      <h2 className={styles.title}>Ingresar Desperdicio</h2>
+      <div className={styles.formContainer}>
+        <form className={styles.form} onSubmit={handleSubmit}>
+          <div className={styles.formGroup}>
+            <label className={styles.label} htmlFor="product-select">
+              Select Product
+            </label>
+            <select
+              id="product-select"
+              className={styles.select}
+              value={selectedProduct}
+              onChange={handleProductChange}
+              required
+            >
+              <option value="">Seleccionar Producto</option>
+              {products.map((product) => (
+                <option key={product.id} value={product.id}>
+                  {product.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.label} htmlFor="quantity">
+              Cantidad
+            </label>
+            <input
+              id="quantity"
+              className={styles.input}
+              type="number"
+              value={quantity}
+              onChange={handleQuantityChange}
+              required
+              min="0.01"
+              step="0.01"
+            />
+          </div>
+
+          <button type="submit" className={styles.button} disabled={loading}>
+            {loading ? "Procesando..." : "Ingresar Desperdicio"}
+          </button>
+        </form>
+
+        {error && <div className={`${styles.alert} ${styles.errorAlert}`}>{error}</div>}
+
+        {success && <div className={`${styles.alert} ${styles.successAlert}`}>{success}</div>}
+      </div>
+    </div>
   )
 }
 

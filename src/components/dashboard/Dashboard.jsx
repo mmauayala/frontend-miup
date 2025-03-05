@@ -1,21 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  IconButton,
-  Drawer,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Avatar,
-  Box,
-} from "@mui/material"
-import { Inventory, Assessment, Delete, LocalOffer, ShoppingCart, History, Logout, Add } from "@mui/icons-material"
+import { useState, useEffect, useContext } from "react"
 import { logout, getCurrentUser } from "../../services/api"
+import { ThemeContext } from "../../context/ThemeContext"
 import ProductManager from "../ProductManager"
 import StockList from "../StockList"
 import MovementHistory from "../MovementHistory"
@@ -26,10 +13,24 @@ import PromotionsManager from "../PromotionsManager"
 import MakeSale from "../MakeSale"
 import AddStock from "../AddStock"
 
-import "./Dashboard.css"
+import styles from "./Dashboard.module.css"
+
+// Import icons
+import {
+  Inventory,
+  Assessment,
+  Delete,
+  LocalOffer,
+  ShoppingCart,
+  History,
+  Logout,
+  Add,
+  Brightness4,
+  Brightness7
+} from "@mui/icons-material"
 
 const menuItems = [
-  { text: "Create/Edit/Delete Product", icon: <Inventory />, component: "ProductManager", adminOnly: true },
+  { text: "Crear/Editar/Borrar Producto", icon: <Inventory />, component: "ProductManager", adminOnly: true },
   { text: "Ver lista de Stock", icon: <Assessment />, component: "StockList" },
   { text: "Añadir Stock", icon: <Add />, component: "AddStock", adminOnly: true },
   { text: "Historial de Desperdicios", icon: <Delete />, component: "WasteHistory" },
@@ -41,15 +42,15 @@ const menuItems = [
 ]
 
 const Dashboard = () => {
+  const { theme, toggleTheme } = useContext(ThemeContext)
   const [selectedComponent, setSelectedComponent] = useState(null)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const user = getCurrentUser()
   const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
     setIsAdmin(user?.userType === "ADMIN")
   }, [user])
-
-  console.log("Usuario actual:", user) // Add this line for debugging
 
   const handleLogout = async () => {
     try {
@@ -62,6 +63,11 @@ const Dashboard = () => {
 
   const handleMenuItemClick = (component) => {
     setSelectedComponent(component)
+    setMobileMenuOpen(false)
+  }
+
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen)
   }
 
   const renderComponent = () => {
@@ -85,60 +91,60 @@ const Dashboard = () => {
       case "AddStock":
         return <AddStock />
       default:
-        return <Typography variant="body1">MIUP Dashboard.</Typography>
+        return (
+          <div className={styles.welcomeMessage}>
+            <h2>Bienvenido a MIUP Dashboard</h2>
+            <p>Selecciona una opción del menú para comenzar.</p>
+          </div>
+        )
     }
   }
 
   return (
-    <Box sx={{ display: "flex" }}>
-      <AppBar position="fixed" className="dashboard-appbar">
-        <Toolbar className="dashboard-toolbar">
-          <Typography variant="h6" component="div">
-            MIUP
-          </Typography>
-          <div className="dashboard-user-info">
-            <Typography>{user?.username}</Typography>
-            <Avatar className="dashboard-avatar">{user?.username?.charAt(0)?.toUpperCase()}</Avatar>
-            <IconButton color="inherit" onClick={handleLogout}>
-              <Logout />
-            </IconButton>
+    <div className={styles.dashboardRoot}>
+      <header className={styles.dashboardHeader}>
+        <div className={styles.headerContent}>
+          <div className={styles.logoContainer}>
+            <h1 className={styles.logo}>Me Importa Un Pepino</h1>
           </div>
-        </Toolbar>
-      </AppBar>
-      <Drawer
-        variant="permanent"
-        className="dashboard-drawer"
-        classes={{
-          paper: "dashboard-drawer-paper",
-        }}
-      >
-        <Toolbar />
-        <div className="dashboard-drawer-container">
-          <List>
-            {menuItems.map((item) => {
-              console.log(`Menu item ${item.text}:`, !item.adminOnly || (item.adminOnly && isAdmin)) // Add this line for debugging
-              return (
-                (!item.adminOnly || (item.adminOnly && isAdmin)) && (
-                  <ListItem
-                    button
-                    key={item.text}
-                    onClick={() => handleMenuItemClick(item.component)}
-                    className="dashboard-menu-item"
-                  >
-                    <ListItemIcon className="dashboard-menu-icon">{item.icon}</ListItemIcon>
-                    <ListItemText primary={item.text} />
-                  </ListItem>
-                )
-              )
-            })}
-          </List>
+          <div className={styles.userControls}>
+            <h1 className={styles.username}>{user?.username}</h1>
+            <div className={styles.userAvatar}>{user?.username?.charAt(0)?.toUpperCase()}</div>
+            <button className={styles.iconButton} onClick={toggleTheme}>
+              {theme === "light" ? <Brightness4 /> : <Brightness7 />}
+            </button>
+            <button className={styles.iconButton} onClick={handleLogout}>
+              <Logout />
+            </button>
+          </div>
         </div>
-      </Drawer>
-      <Box component="main" className="dashboard-content">
-        <Toolbar />
-        {renderComponent()}
-      </Box>
-    </Box>
+      </header>
+
+      <div className={styles.mainContainer}>
+        <aside className={`${styles.sidebar} ${mobileMenuOpen ? styles.sidebarOpen : ""}`}>
+          <nav className={styles.sidebarNav}>
+            <ul className={styles.sidebarMenu}>
+              {menuItems.map(
+                (item) =>
+                  (!item.adminOnly || (item.adminOnly && isAdmin)) && (
+                    <li key={item.text} className={styles.sidebarMenuItem}>
+                      <button
+                        className={`${styles.sidebarMenuButton} ${selectedComponent === item.component ? styles.active : ""}`}
+                        onClick={() => handleMenuItemClick(item.component)}
+                      >
+                        <span className={styles.menuIcon}>{item.icon}</span>
+                        <span className={styles.menuText}>{item.text}</span>
+                      </button>
+                    </li>
+                  ),
+              )}
+            </ul>
+          </nav>
+        </aside>
+
+        <main className={styles.content}>{renderComponent()}</main>
+      </div>
+    </div>
   )
 }
 

@@ -2,30 +2,27 @@ import React, { useState } from 'react';
 import { login } from '../services/api';
 import { useNavigate, Link } from 'react-router-dom';
 
-const Login = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
+import styles from '../styles/AuthForm.module.css';
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError('');
+const Login = () => {
+  const [username, setUsername] = useState("")
+  const [password, setPassword] = useState("")
+  const navigate = useNavigate()
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
     try {
-      const userData = await login(username, password);
-      console.log('Login exitoso, user data:', userData);
-      navigate('/dashboard');
+      await login(username, password)
+      navigate("/dashboard")
     } catch (error) {
-      console.error('Login fallido:', error);
-      setError(`Login fallido: ${error.message}`);
+      console.error("Login failed:", error)
     }
-  };
+  }
 
   return (
-    <div className="container">
-      <h2>Login</h2>
-      {error && <p className="error">{error}</p>}
-      <form onSubmit={handleLogin}>
+    <div className={styles.container}>
+      <h2>LOGIN</h2>
+      <form onSubmit={handleSubmit}>
         <input
           type="text"
           placeholder="Username"
@@ -42,7 +39,9 @@ const Login = () => {
         />
         <button type="submit">Login</button>
       </form>
-      <Link to="/register" className="link">No tienes una cuenta? Regístrate</Link>
+      <Link to="/register" className={styles.link}>
+        ¿No tienes una cuenta? Regístrate
+      </Link>
     </div>
   );
 };

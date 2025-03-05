@@ -1,0 +1,84 @@
+/* Definición de variables globales para tema claro y oscuro */
+:root {
+  --font-family: "Inter", system-ui, sans-serif;
+  --border-radius: 8px;
+  --transition: 0.3s ease;
+}
+
+/* Tema claro */
+[data-theme="light"] {
+  --background: #f7f7f7;
+  --text-color: #213547;
+  --primary-color: #0c412f;
+  --secondary-color: #166330;
+  --border-color: #e0e0e0;
+  --button-bg: var(--primary-color);
+  --button-text: #ffffff;
+
+  /* Dashboard specific colors */
+  --white: #ffffff;
+  --light-grey: #f0f0f0;
+  --dark-grey: #333333;
+  --light-green: #74c69d;
+  --dark-green: var(--primary-color);
+  --sidebar-bg: var(--white);
+  --sidebar-text: var(--dark-grey);
+  --sidebar-hover: var(--light-grey);
+  --sidebar-active-bg: var(--primary-color);
+  --sidebar-active-text: #ffffff;
+  --content-bg: #f5f5f5;
+  --card-bg: var(--white);
+  --card-shadow: rgba(0, 0, 0, 0.1);
+}
+
+/* Tema oscuro */
+[data-theme="dark"] {
+  --background: #242424;
+  --text-color: rgba(255, 255, 255, 0.87);
+  --primary-color: #74c69d;
+  --secondary-color: #52b788;
+  --border-color: #333333;
+  --button-bg: var(--primary-color);
+  --button-text: #000000;
+
+  /* Dashboard specific colors */
+  --white: #1e1e1e;
+  --light-grey: #2d2d2d;
+  --dark-grey: #e0e0e0;
+  --light-green: #52b788;
+  --dark-green: var(--primary-color);
+  --sidebar-bg: #1e1e1e;
+  --sidebar-text: #e0e0e0;
+  --sidebar-hover: #2d2d2d;
+  --sidebar-active-bg: var(--primary-color);
+  --sidebar-active-text: #000000;
+  --content-bg: #242424;
+  --card-bg: #1e1e1e;
+  --card-shadow: rgba(0, 0, 0, 0.3);
+}
+
+/* Estilos generales */
+body {
+  font-family: var(--font-family);
+  background-color: var(--background);
+  color: var(--text-color);
+  transition: background-color var(--transition), color var(--transition);
+  margin: 0;
+  padding: 0;
+}
+
+button {
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  border: none;
+  border-radius: var(--border-radius);
+  padding: 0.75rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color var(--transition);
+}
+
+button:hover {
+  background-color: var(--secondary-color);
+}
+

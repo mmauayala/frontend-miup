@@ -1,20 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Typography,
-  Box,
-  CircularProgress,
-  Chip,
-} from "@mui/material"
 import { getPromotionsList } from "../services/api"
+import styles from "../styles/PromotionsList.module.css"
+
 
 const PromotionsList = () => {
   const [promotions, setPromotions] = useState([])
@@ -41,63 +30,66 @@ const PromotionsList = () => {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
-        <CircularProgress />
-      </Box>
+      <div className={styles.container}>
+        <h2 className={styles.title}>Lista de Promociones</h2>
+        <div className={styles.loadingContainer}>
+          <div className="loading-spinner"></div>
+        </div>
+      </div>
     )
   }
 
   if (error) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
-        <Typography color="error">{error}</Typography>
-      </Box>
+      <div className={styles.container}>
+        <h2 className={styles.title}>Lista de Promociones</h2>
+        <div className={styles.errorContainer}>
+          <p className={styles.errorMessage}>{error}</p>
+        </div>
+      </div>
     )
   }
 
   return (
-    <Box sx={{ maxWidth: 1200, margin: "auto", padding: 2 }}>
-      <Typography variant="h4" gutterBottom>
-        Lista de Promociones
-      </Typography>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Nombre</TableCell>
-              <TableCell>Tipo</TableCell>
-              <TableCell>Cantidad Requerida</TableCell>
-              <TableCell>Cantidad Bonificada</TableCell>
-              <TableCell>Fecha de Inicio</TableCell>
-              <TableCell>Fecha de Caducidad</TableCell>
-              <TableCell>Estado</TableCell>
-              <TableCell>Producto</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
+    <div className={styles.container}>
+      <h2 className={styles.title}>Lista de Promociones</h2>
+      <div className={styles.tableContainer}>
+        <table className={styles.table}>
+          <thead className={styles.tableHeader}>
+            <tr>
+              <th className={styles.tableHeaderCell}>ID</th>
+              <th className={styles.tableHeaderCell}>Nombre</th>
+              <th className={styles.tableHeaderCell}>Tipo</th>
+              <th className={styles.tableHeaderCell}>Cantidad requerida</th>
+              <th className={styles.tableHeaderCell}>Cantidad bonificada</th>
+              <th className={styles.tableHeaderCell}>Fecha de inicio</th>
+              <th className={styles.tableHeaderCell}>Fecha de expiracion</th>
+              <th className={styles.tableHeaderCell}>Estado</th>
+              <th className={styles.tableHeaderCell}>Producto</th>
+            </tr>
+          </thead>
+          <tbody>
             {promotions.map((promotion) => (
-              <TableRow key={promotion.id}>
-                <TableCell>{promotion.id}</TableCell>
-                <TableCell>{promotion.nombre}</TableCell>
-                <TableCell>{promotion.tipo}</TableCell>
-                <TableCell>{promotion.cantidadRequerida}</TableCell>
-                <TableCell>{promotion.cantidadBonificada}</TableCell>
-                <TableCell>{promotion.fechaInicio.join("-")}</TableCell>
-                <TableCell>{promotion.fechaFin.join("-")}</TableCell>
-                <TableCell>
-                  <Chip
-                    label={promotion.activa ? "Active" : "Inactive"}
-                    color={promotion.activa ? "success" : "default"}
-                  />
-                </TableCell>
-                <TableCell>{promotion.producto}</TableCell>
-              </TableRow>
+              <tr key={promotion.id} className={styles.tableRow}>
+                <td className={styles.tableCell}>{promotion.id}</td>
+                <td className={styles.tableCell}>{promotion.nombre}</td>
+                <td className={styles.tableCell}>{promotion.tipo}</td>
+                <td className={styles.tableCell}>{promotion.cantidadRequerida}</td>
+                <td className={styles.tableCell}>{promotion.cantidadBonificada}</td>
+                <td className={styles.tableCell}>{promotion.fechaInicio.join("-")}</td>
+                <td className={styles.tableCell}>{promotion.fechaFin.join("-")}</td>
+                <td className={styles.tableCell}>
+                  <span className={`${styles.chip} ${promotion.activa ? styles.activeChip : styles.inactiveChip}`}>
+                    {promotion.activa ? "Activa" : "Inactiva"}
+                  </span>
+                </td>
+                <td className={styles.tableCell}>{promotion.producto}</td>
+              </tr>
             ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Box>
+          </tbody>
+        </table>
+      </div>
+    </div>
   )
 }
 
