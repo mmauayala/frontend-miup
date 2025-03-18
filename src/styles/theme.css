@@ -29,6 +29,13 @@
   --content-bg: #f5f5f5;
   --card-bg: var(--white);
   --card-shadow: rgba(0, 0, 0, 0.1);
+
+  /* Select and option colors */
+  --select-bg: #ffffff;
+  --select-text: #213547;
+  --option-bg: #ffffff;
+  --option-text: #213547;
+  --option-hover-bg: #f0f0f0;
 }
 
 /* Tema oscuro */
@@ -55,6 +62,13 @@
   --content-bg: #242424;
   --card-bg: #1e1e1e;
   --card-shadow: rgba(0, 0, 0, 0.3);
+
+  /* Select and option colors */
+  --select-bg: #2d2d2d;
+  --select-text: rgba(255, 255, 255, 0.87);
+  --option-bg: #333333;
+  --option-text: rgba(255, 255, 255, 0.87);
+  --option-hover-bg: #444444;
 }
 
 /* Estilos generales */
@@ -81,4 +95,25 @@ button {
 button:hover {
   background-color: var(--secondary-color);
 }
+
+/* Fix for select and option elements */
+select {
+  background-color: var(--select-bg);
+  color: var(--select-text);
+  border: 1px solid var(--border-color);
+}
+
+/* This will help with some browsers, but not all browsers allow full styling of option elements */
+option {
+  background-color: var(--option-bg);
+  color: var(--option-text);
+}
+
+/* For browsers that support it, add hover effect */
+option:hover {
+  background-color: var(--option-hover-bg);
+}
+
+
+
 

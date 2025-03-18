@@ -9,6 +9,24 @@ const api = axios.create({
   },
 })
 
+export const SESSION_TIMEOUT_EVENT = "session_timeout"
+
+export const emitSessionTimeout = () => {
+  console.log("Emitting session timeout event")
+  const event = new CustomEvent(SESSION_TIMEOUT_EVENT)
+  window.dispatchEvent(event)
+}
+
+api.interceptors.request.use((request) => {
+  console.log("Starting Request", JSON.stringify(request, null, 2))
+  return request
+})
+
+api.interceptors.response.use((response) => {
+  console.log("Response:", JSON.stringify(response, null, 2))
+  return response
+})
+
 export const getCurrentUser = () => {
   const userStr = localStorage.getItem("user")
   if (userStr) {
@@ -106,18 +124,31 @@ export const refreshToken = async () => {
   const user = getCurrentUser()
   if (user && user.refreshToken) {
     try {
-      const response = await axios.post(`${API_URL}/usuarios/refresh-token`, null, {
+      console.log("Attempting to refresh token...")
+      const response = await api.post("/autenticacion/usuarios/refresh-token", null, {
         params: { token: user.refreshToken },
       })
-      const newAccessToken = response.data.accessToken
+
+      console.log("Token refresh successful:", response.data)
+      const newAccessToken = response.data.accessToken || response.data.response?.accessToken
+
+      if (!newAccessToken) {
+        throw new Error("No access token in refresh response")
+      }
+
+      // Update the user object with the new token
       user.accessToken = newAccessToken
       localStorage.setItem("user", JSON.stringify(user))
+
       return newAccessToken
     } catch (error) {
       console.error("Token refresh failed:", error)
+      emitSessionTimeout()
       throw error
     }
   }
+  console.error("No refresh token available")
+  emitSessionTimeout()
   throw new Error("No refresh token available")
 }
 
@@ -141,14 +172,21 @@ api.interceptors.response.use(
     try {
       if (error.response && error.response.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true
+
+        // Instead of automatically refreshing, emit the session timeout event
+        if (!originalRequest.url.includes("/refresh-token")) {
+          emitSessionTimeout()
+          return Promise.reject(error)
+        }
+
         const newAccessToken = await refreshToken()
         originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`
         return api(originalRequest)
       }
     } catch (refreshError) {
       console.error("Token refresh failed:", refreshError)
-      // If refresh fails, redirect to login
-      window.location.href = "/login"
+      // Emit session timeout event
+      emitSessionTimeout()
       return Promise.reject(refreshError)
     }
     return Promise.reject(error)

@@ -13,6 +13,7 @@ import PromotionsManager from "../PromotionsManager"
 import MakeSale from "../MakeSale"
 import AddStock from "../AddStock"
 
+
 import styles from "./Dashboard.module.css"
 
 // Import icons
@@ -44,7 +45,6 @@ const menuItems = [
 const Dashboard = () => {
   const { theme, toggleTheme } = useContext(ThemeContext)
   const [selectedComponent, setSelectedComponent] = useState(null)
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const user = getCurrentUser()
   const [isAdmin, setIsAdmin] = useState(false)
 
@@ -63,12 +63,8 @@ const Dashboard = () => {
 
   const handleMenuItemClick = (component) => {
     setSelectedComponent(component)
-    setMobileMenuOpen(false)
   }
 
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen)
-  }
 
   const renderComponent = () => {
     switch (selectedComponent) {
@@ -121,7 +117,7 @@ const Dashboard = () => {
       </header>
 
       <div className={styles.mainContainer}>
-        <aside className={`${styles.sidebar} ${mobileMenuOpen ? styles.sidebarOpen : ""}`}>
+        <aside className={styles.sidebarOpen}>
           <nav className={styles.sidebarNav}>
             <ul className={styles.sidebarMenu}>
               {menuItems.map(
@@ -143,10 +139,11 @@ const Dashboard = () => {
         </aside>
 
         <main className={styles.content}>{renderComponent()}</main>
+
       </div>
+
     </div>
   )
 }
 
 export default Dashboard
-

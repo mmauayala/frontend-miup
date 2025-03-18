@@ -6,7 +6,6 @@ import { getStockList, makeSale, getPromotionsList, getProductIdByName } from ".
 import SaleInfoDialog from "./SaleInfoDialog"
 import styles from "../styles/MakeSale.module.css"
 
-
 const MakeSale = () => {
   const [products, setProducts] = useState([])
   const [promotions, setPromotions] = useState([])
@@ -68,13 +67,13 @@ const MakeSale = () => {
       return
     }
 
-    const currentQuantity = cart[product.id]?.quantity || 0
+    const currentQuantity = Number.parseFloat(cart[product.id]?.quantity) || 0
     if (currentQuantity < product.cantidad) {
       setCart((prevCart) => ({
         ...prevCart,
         [product.id]: {
           ...product,
-          quantity: currentQuantity + 1,
+          quantity: (currentQuantity + 1).toString(),
         },
       }))
     } else {
@@ -85,10 +84,12 @@ const MakeSale = () => {
   const handleRemoveFromCart = (productId) => {
     setCart((prevCart) => {
       const newCart = { ...prevCart }
-      if (newCart[productId].quantity > 1) {
+      const currentQuantity = Number.parseFloat(newCart[productId].quantity) || 0
+
+      if (currentQuantity > 1) {
         newCart[productId] = {
           ...newCart[productId],
-          quantity: newCart[productId].quantity - 1,
+          quantity: (currentQuantity - 1).toString(),
         }
       } else {
         delete newCart[productId]
@@ -97,23 +98,33 @@ const MakeSale = () => {
     })
   }
 
-  const handleQuantityChange = (productId, quantity) => {
-    const product = products.find((p) => p.id === productId)
-    if (!product) {
-      setSnackbar({ open: true, message: "Producto no encontrado", severity: "error" })
-      return
-    }
+  const handleQuantityChange = (productId, e) => {
+    // Get the raw input value
+    const inputValue = e.target.value
 
-    if (quantity > 0 && quantity <= product.cantidad) {
-      setCart((prevCart) => ({
-        ...prevCart,
-        [productId]: {
-          ...prevCart[productId],
-          quantity: quantity,
-        },
-      }))
-    } else if (quantity > product.cantidad) {
-      setSnackbar({ open: true, message: "El stock disponible es menor a la cantidad", severity: "warning" })
+    // Allow any input that could be part of a valid decimal number
+    // This includes empty string, just a decimal point, or numbers with decimals
+    setCart((prevCart) => ({
+      ...prevCart,
+      [productId]: {
+        ...prevCart[productId],
+        quantity: inputValue, // Store the raw input value as a string
+      },
+    }))
+
+    // Only validate after the user has entered something
+    if (inputValue !== "" && inputValue !== "." && inputValue !== "0.") {
+      const quantity = Number.parseFloat(inputValue)
+      const product = products.find((p) => p.id === productId)
+
+      // Check if it's a valid number and within stock limits
+      if (!isNaN(quantity) && product && quantity > product.cantidad) {
+        setSnackbar({
+          open: true,
+          message: "El stock disponible es menor a la cantidad",
+          severity: "warning",
+        })
+      }
     }
   }
 
@@ -137,8 +148,15 @@ const MakeSale = () => {
         const bPromo = promotions.find((p) => p.producto === b.producto)
         return (bPromo ? 1 : 0) - (aPromo ? 1 : 0)
       }
-      return 0 
+      return 0
     })
+
+  const calculateTotal = () => {
+    return Object.values(cart).reduce((total, item) => {
+      const quantity = Number.parseFloat(item.quantity) || 0
+      return total + item.precioVenta * quantity
+    }, 0)
+  }
 
   const handleCheckout = async () => {
     try {
@@ -146,20 +164,22 @@ const MakeSale = () => {
 
       for (const [productId, item] of Object.entries(cart)) {
         const product = products.find((p) => p.id === Number.parseInt(productId))
+        const quantity = Number.parseFloat(item.quantity) || 0
+
         if (!product || product.cantidad === 0) {
           setSnackbar({
             open: true,
-            message: `Product ${product ? product.producto : productId} está fuera de stock`,
+            message: `Product ${product ? product.producto : productId} is out of stock`,
             severity: "error",
           })
           setLoading(false)
           return
         }
 
-        if (item.quantity > product.cantidad) {
+        if (quantity > product.cantidad) {
           setSnackbar({
             open: true,
-            message: `Solo hay ${product.cantidad} unidades de ${product.producto} disponible/s`,
+            message: `Only ${product.cantidad} units of ${product.producto} available`,
             severity: "error",
           })
           setLoading(false)
@@ -172,28 +192,30 @@ const MakeSale = () => {
 
       for (const [productId, item] of Object.entries(cart)) {
         try {
+          const quantity = Number.parseFloat(item.quantity) || 0
+
           if (!productIds[item.producto]) {
             const realProductId = await getProductIdByName(item.producto)
             setProductIds((prev) => ({ ...prev, [item.producto]: realProductId }))
-            formattedSaleData[realProductId] = item.quantity
+            formattedSaleData[realProductId] = quantity
             cartDetails[realProductId] = {
               producto: item.producto,
               precioVenta: item.precioVenta,
-              quantity: item.quantity,
+              quantity: quantity,
             }
           } else {
-            formattedSaleData[productIds[item.producto]] = item.quantity
+            formattedSaleData[productIds[item.producto]] = quantity
             cartDetails[productIds[item.producto]] = {
               producto: item.producto,
               precioVenta: item.precioVenta,
-              quantity: item.quantity,
+              quantity: quantity,
             }
           }
         } catch (error) {
-          console.error(`Error al obtener el ID del producto real para ${item.producto}:`, error)
+          console.error(`Error getting real product ID for ${item.producto}:`, error)
           setSnackbar({
             open: true,
-            message: `Error al obtener el ID del producto ${item.producto}`,
+            message: `Error getting product ID for ${item.producto}`,
             severity: "error",
           })
           setLoading(false)
@@ -201,80 +223,37 @@ const MakeSale = () => {
         }
       }
 
-      console.log("Datos de venta antes de la llamada a la API:", JSON.stringify(formattedSaleData, null, 2))
+      console.log("Sale data before API call:", JSON.stringify(formattedSaleData, null, 2))
       const result = await makeSale(formattedSaleData)
-      console.log("Venta result:", JSON.stringify(result, null, 2))
-      console.log("Detalles del carrito:", JSON.stringify(cartDetails, null, 2))
+      console.log("Sale result:", JSON.stringify(result, null, 2))
+      console.log("Cart details:", JSON.stringify(cartDetails, null, 2))
 
-      const saleInfoWithDetails = []
-      const transactionId = Math.floor(Math.random() * 1000000)
-      const saleDate = new Date().toISOString()
-
-      console.log("Creación de información de venta a partir de la respuesta:", JSON.stringify(result, null, 2))
-      console.log("Detalles del carrito:", JSON.stringify(cartDetails, null, 2))
+      console.log("Creating sale info from response:", JSON.stringify(result, null, 2))
+      console.log("Using cart details:", JSON.stringify(cartDetails, null, 2))
 
       if (result && Array.isArray(result) && result.length > 0) {
-        for (const item of result) {
-          const productId = item.productoId || item.id
-          const details = cartDetails[productId]
-          if (details) {
-            saleInfoWithDetails.push({
-              id: productId,
-              producto: details.producto,
-              precioVenta: details.precioVenta,
-              cantidadVendida: item.cantidad || details.quantity,
-              fechaVenta: saleDate,
-              transaccionId: transactionId,
-            })
-          }
-        }
-      } else if (result && typeof result === "object" && Object.keys(result).length > 0) {
-        for (const [productId, quantity] of Object.entries(result)) {
-          const details = cartDetails[productId]
-          console.log(`Producto de procesamiento ID ${productId}, detalles:`, details)
-          if (details) {
-            saleInfoWithDetails.push({
-              id: productId,
-              producto: details.producto,
-              precioVenta: details.precioVenta,
-              cantidadVendida: quantity,
-              fechaVenta: saleDate,
-              transaccionId: transactionId,
-            })
-          }
-        }
-      }
-
-      if (saleInfoWithDetails.length === 0) {
-        console.log("Crear información de venta desde el carrito en lugar de la respuesta")
-        for (const [localProductId, item] of Object.entries(cart)) {
-          saleInfoWithDetails.push({
-            id: localProductId,
-            producto: item.producto,
-            precioVenta: item.precioVenta,
-            cantidadVendida: item.quantity,
-            fechaVenta: saleDate,
-            transaccionId: transactionId,
-          })
-        }
-      }
-
-      if (saleInfoWithDetails.length > 0) {
-        setSaleInfoDialog({ open: true, saleInfo: saleInfoWithDetails })
+        setSaleInfoDialog({ open: true, saleInfo: result })
         setCart({})
         fetchProducts()
+      } else if (result && typeof result === "object" && Object.keys(result).length > 0) {
+        console.log("Unexpected response format:", result)
+        setSnackbar({
+          open: true,
+          message: "Unexpected response format from server",
+          severity: "warning",
+        })
       } else {
-        console.error("No se pudo crear información de venta desde la respuesta o el carrito")
-        throw new Error("No se pudo crear información de venta desde la respuesta o el carrito")
+        console.error("Empty or invalid response from server")
+        throw new Error("Empty or invalid response from server")
       }
     } catch (error) {
-      console.error("Error al realizar la venta:", error)
-      let errorMessage = "Error al realizar la venta"
+      console.error("Error making sale:", error)
+      let errorMessage = "Error making sale"
       if (error.response) {
         console.error("Error response:", JSON.stringify(error.response.data, null, 2))
         errorMessage = error.response.data.message || errorMessage
       } else if (error.request) {
-        console.error("No se recibió respuesta:", error.request)
+        console.error("No response received:", error.request)
       } else {
         console.error("Error details:", error.message)
       }
@@ -282,12 +261,6 @@ const MakeSale = () => {
     } finally {
       setLoading(false)
     }
-  }
-
-  const calculateTotal = () => {
-    return Object.values(cart).reduce((total, item) => {
-      return total + item.precioVenta * item.quantity
-    }, 0)
   }
 
   return (
@@ -299,7 +272,7 @@ const MakeSale = () => {
             <div className={styles.searchContainer}>
               <input
                 type="text"
-                placeholder="Search Products"
+                placeholder="Buscar Productos"
                 value={search}
                 onChange={handleSearch}
                 className={styles.searchInput}
@@ -345,7 +318,9 @@ const MakeSale = () => {
           <div className={styles.card}>
             <h3 className={styles.cartTitle}>Carrito</h3>
             {Object.keys(cart).length === 0 ? (
-              <div className={styles.emptyCart}>Su carrito está vacío. Agregue productos para continuar con el pago.</div>
+              <div className={styles.emptyCart}>
+                Su carrito está vacío. Agregue productos para continuar con el pago.
+              </div>
             ) : (
               <ul className={styles.cartList}>
                 {Object.entries(cart).map(([productId, item]) => (
@@ -361,12 +336,12 @@ const MakeSale = () => {
                         <Remove />
                       </button>
                       <input
-                        type="number"
+                        type="text"
                         value={item.quantity}
-                        onChange={(e) => handleQuantityChange(productId, Number.parseInt(e.target.value))}
-                        min="1"
-                        max={item.cantidad}
+                        onChange={(e) => handleQuantityChange(productId, e)}
                         className={styles.quantityInput}
+                        inputMode="decimal"
+                        style={{ width: "70px" }}
                       />
                       <button className={styles.iconButton} onClick={() => handleAddToCart(item)}>
                         <Add />
@@ -391,7 +366,11 @@ const MakeSale = () => {
       {snackbar.open && (
         <div className={`${styles.alert} ${styles[`${snackbar.severity}Alert`]}`}>
           {snackbar.message}
-          <button className={styles.closeButton} onClick={() => setSnackbar({ ...snackbar, open: false })}>
+          <button
+            className={styles.closeButton}
+            onClick={() => setSnackbar({ ...snackbar, open: false })}
+            aria-label="Close notification"
+          >
             ×
           </button>
         </div>

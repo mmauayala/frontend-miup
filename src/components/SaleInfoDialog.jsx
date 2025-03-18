@@ -1,9 +1,14 @@
+"use client"
+
 import styles from "../styles/SaleInfoDialog.module.css"
 
 const SaleInfoDialog = ({ open, onClose, saleInfo }) => {
   if (!open || !saleInfo) return null
 
-  const totalAmount = saleInfo.reduce((total, item) => total + (item.precioVenta || 0) * (item.cantidadVendida || 0), 0)
+  // Calculate total by summing the precioVenta values directly from the API response
+  const totalAmount = saleInfo.reduce((total, item) => {
+    return total + item.precioVenta
+  }, 0)
 
   return (
     <>
@@ -15,21 +20,17 @@ const SaleInfoDialog = ({ open, onClose, saleInfo }) => {
             <table className={styles.table}>
               <thead className={styles.tableHeader}>
                 <tr>
-                  <th className={styles.tableHeaderCell}>Producto</th>
+                  <th className={styles.tableHeaderCell}>ID Venta</th>
                   <th className={styles.tableHeaderCell}>Cantidad</th>
                   <th className={styles.tableHeaderCell}>Precio</th>
-                  <th className={styles.tableHeaderCell}>Subtotal</th>
                 </tr>
               </thead>
               <tbody>
                 {saleInfo.map((item) => (
                   <tr key={item.id} className={styles.tableRow}>
-                    <td className={styles.tableCell}>{item.producto}</td>
+                    <td className={styles.tableCell}>{item.id}</td>
                     <td className={styles.tableCell}>{item.cantidadVendida}</td>
-                    <td className={styles.tableCell}>${(item.precioVenta || 0).toFixed(2)}</td>
-                    <td className={`${styles.tableCell} ${styles.rightAlign}`}>
-                      ${((item.precioVenta || 0) * (item.cantidadVendida || 0)).toFixed(2)}
-                    </td>
+                    <td className={styles.tableCell}>${item.precioVenta.toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>
