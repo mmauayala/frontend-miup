@@ -16,7 +16,7 @@ const MakeSale = () => {
   const [saleInfoDialog, setSaleInfoDialog] = useState({ open: false, saleInfo: null })
   const [loading, setLoading] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
-  const [productIds, setProductIds] = useState({}) // Cache for product IDs
+  const [productIds, setProductIds] = useState({}) 
 
   useEffect(() => {
     fetchProducts()
@@ -29,7 +29,6 @@ const MakeSale = () => {
       const stockList = await getStockList()
       setProducts(stockList)
 
-      // Update cart to remove products that no longer have stock
       setCart((prevCart) => {
         const newCart = { ...prevCart }
         Object.entries(newCart).forEach(([productId, item]) => {
@@ -99,25 +98,21 @@ const MakeSale = () => {
   }
 
   const handleQuantityChange = (productId, e) => {
-    // Get the raw input value
+
     const inputValue = e.target.value
 
-    // Allow any input that could be part of a valid decimal number
-    // This includes empty string, just a decimal point, or numbers with decimals
     setCart((prevCart) => ({
       ...prevCart,
       [productId]: {
         ...prevCart[productId],
-        quantity: inputValue, // Store the raw input value as a string
+        quantity: inputValue, 
       },
     }))
 
-    // Only validate after the user has entered something
     if (inputValue !== "" && inputValue !== "." && inputValue !== "0.") {
       const quantity = Number.parseFloat(inputValue)
       const product = products.find((p) => p.id === productId)
 
-      // Check if it's a valid number and within stock limits
       if (!isNaN(quantity) && product && quantity > product.cantidad) {
         setSnackbar({
           open: true,
@@ -169,7 +164,7 @@ const MakeSale = () => {
         if (!product || product.cantidad === 0) {
           setSnackbar({
             open: true,
-            message: `Product ${product ? product.producto : productId} is out of stock`,
+            message: `El producto ${product ? product.producto : productId} esta fuera de stock`,
             severity: "error",
           })
           setLoading(false)
@@ -179,7 +174,7 @@ const MakeSale = () => {
         if (quantity > product.cantidad) {
           setSnackbar({
             open: true,
-            message: `Only ${product.cantidad} units of ${product.producto} available`,
+            message: `Solo ${product.cantidad} unidades de ${product.producto} disponibles`,
             severity: "error",
           })
           setLoading(false)
@@ -212,10 +207,10 @@ const MakeSale = () => {
             }
           }
         } catch (error) {
-          console.error(`Error getting real product ID for ${item.producto}:`, error)
+          console.error(`Error al obtener el ID del producto para ${item.producto}:`, error)
           setSnackbar({
             open: true,
-            message: `Error getting product ID for ${item.producto}`,
+            message: `Error al obtener el ID del producto para ${item.producto}`,
             severity: "error",
           })
           setLoading(false)
@@ -223,28 +218,28 @@ const MakeSale = () => {
         }
       }
 
-      console.log("Sale data before API call:", JSON.stringify(formattedSaleData, null, 2))
+      console.log("Datos de venta antes de la llamada a la API:", JSON.stringify(formattedSaleData, null, 2))
       const result = await makeSale(formattedSaleData)
-      console.log("Sale result:", JSON.stringify(result, null, 2))
-      console.log("Cart details:", JSON.stringify(cartDetails, null, 2))
+      console.log("Resultado de la venta:", JSON.stringify(result, null, 2))
+      console.log("Detalles del carrito:", JSON.stringify(cartDetails, null, 2))
 
-      console.log("Creating sale info from response:", JSON.stringify(result, null, 2))
-      console.log("Using cart details:", JSON.stringify(cartDetails, null, 2))
+      console.log("Creación de información de venta a partir de la respuesta:", JSON.stringify(result, null, 2))
+      console.log("Uso de los detalles del carrito:", JSON.stringify(cartDetails, null, 2))
 
       if (result && Array.isArray(result) && result.length > 0) {
         setSaleInfoDialog({ open: true, saleInfo: result })
         setCart({})
         fetchProducts()
       } else if (result && typeof result === "object" && Object.keys(result).length > 0) {
-        console.log("Unexpected response format:", result)
+        console.log("Formato de respuesta inesperada:", result)
         setSnackbar({
           open: true,
-          message: "Unexpected response format from server",
-          severity: "warning",
+          message: "Formato de respuesta inesperado del servidor",
+          severity: "advertencia",
         })
       } else {
-        console.error("Empty or invalid response from server")
-        throw new Error("Empty or invalid response from server")
+        console.error("Respuesta vacía o inválida del servidor")
+        throw new Error("Respuesta vacía o inválida del servidor")
       }
     } catch (error) {
       console.error("Error making sale:", error)

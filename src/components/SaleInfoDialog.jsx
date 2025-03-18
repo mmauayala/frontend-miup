@@ -5,7 +5,6 @@ import styles from "../styles/SaleInfoDialog.module.css"
 const SaleInfoDialog = ({ open, onClose, saleInfo }) => {
   if (!open || !saleInfo) return null
 
-  // Calculate total by summing the precioVenta values directly from the API response
   const totalAmount = saleInfo.reduce((total, item) => {
     return total + item.precioVenta
   }, 0)

@@ -9,7 +9,6 @@ const SessionTimeoutDialog = () => {
   const [countdown, setCountdown] = useState(60) // 60 seconds countdown
   const [isRefreshing, setIsRefreshing] = useState(false)
 
-  // Function to handle staying on the page (refreshing token)
   const handleStay = useCallback(async () => {
     try {
       setIsRefreshing(true)
@@ -17,8 +16,7 @@ const SessionTimeoutDialog = () => {
       setIsOpen(false)
       setCountdown(60)
     } catch (error) {
-      console.error("Failed to refresh token:", error)
-      // If refresh fails, force logout
+      console.error("No se pudo actualizar el token:", error)
       handleLogout()
     } finally {
       setIsRefreshing(false)
@@ -30,9 +28,8 @@ const SessionTimeoutDialog = () => {
     try {
       await logout()
     } catch (error) {
-      console.error("Error during logout:", error)
+      console.error("Error durante el cierre de sesión:", error)
     } finally {
-      // Redirect to login page regardless of logout success/failure
       window.location.href = "/login"
     }
   }, [])
@@ -52,7 +49,6 @@ const SessionTimeoutDialog = () => {
     }
   }, [])
 
-  // Countdown timer when dialog is open
   useEffect(() => {
     let timer
     if (isOpen && countdown > 0) {
@@ -60,7 +56,6 @@ const SessionTimeoutDialog = () => {
         setCountdown((prev) => prev - 1)
       }, 1000)
     } else if (isOpen && countdown === 0) {
-      // Auto logout when countdown reaches zero
       handleLogout()
     }
 
@@ -76,14 +71,14 @@ const SessionTimeoutDialog = () => {
       <div className={styles.dialog}>
         <h2 className={styles.title}>Session Timeout</h2>
         <p className={styles.message}>
-          Your session is about to expire due to inactivity. Would you like to continue working?
+          Tu sesión está a punto de expirar por inactividad. ¿Quieres seguir trabajando?
         </p>
         <p className={styles.countdown}>
-          Session will expire in <span className={styles.timer}>{countdown}</span> seconds.
+         La sesión expirará en <span className={styles.timer}>{countdown}</span> segundos.
         </p>
         <div className={styles.actions}>
           <button className={styles.stayButton} onClick={handleStay} disabled={isRefreshing}>
-            {isRefreshing ? "Refreshing..." : "Continue Session"}
+            {isRefreshing ? "Refreshing..." : "Continuar Sesion"}
           </button>
           <button className={styles.logoutButton} onClick={handleLogout}>
             Logout

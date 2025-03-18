@@ -12,9 +12,7 @@ const ProductManager = () => {
   const [editingId, setEditingId] = useState(null)
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(null)
-  // Local state to track products that can't be deleted
   const [undeletableProducts, setUndeletableProducts] = useState(new Set())
-  // Local state to track hidden products (purely visual)
   const [hiddenProducts, setHiddenProducts] = useState(new Set())
 
   useEffect(() => {
@@ -26,7 +24,7 @@ const ProductManager = () => {
       const fetchedProducts = await getProducts()
       setProducts(fetchedProducts)
     } catch (error) {
-      console.error("Error fetching products:", error)
+      console.error("Error al buscar productos:", error)
     }
   }
 
@@ -37,18 +35,18 @@ const ProductManager = () => {
         await updateProduct(editingId, { name, medida })
         setProducts(products.map((p) => (p.id === editingId ? { ...p, name, medida } : p)))
         setEditingId(null)
-        setSuccess("Product updated successfully")
+        setSuccess("Producto actualizado exitosamente")
       } else {
         const newProduct = await createProduct({ name, medida })
         setProducts([...products, newProduct])
-        setSuccess("Product created successfully")
+        setSuccess("Producto creado exitosamente")
       }
       setName("")
       setMedida("")
       setTimeout(() => setSuccess(null), 3000)
     } catch (error) {
-      console.error("Error submitting product:", error)
-      setError("Error saving product. Please try again.")
+      console.error("Error al enviar el producto:", error)
+      setError("Error al guardar el producto. Inténtalo de nuevo.")
       setTimeout(() => setError(null), 3000)
     }
   }
@@ -64,40 +62,34 @@ const ProductManager = () => {
       await deleteProduct(id)
       setProducts(products.filter((p) => p.id !== id))
 
-      // If the product was previously marked as undeletable, remove it from the set
       if (undeletableProducts.has(id)) {
         const newSet = new Set(undeletableProducts)
         newSet.delete(id)
         setUndeletableProducts(newSet)
       }
 
-      // Also remove from hidden products if it was there
       if (hiddenProducts.has(id)) {
         const newHiddenSet = new Set(hiddenProducts)
         newHiddenSet.delete(id)
         setHiddenProducts(newHiddenSet)
       }
 
-      setSuccess("Product deleted successfully")
+      setSuccess("Producto borrado exitosamente")
       setTimeout(() => setSuccess(null), 3000)
     } catch (error) {
-      console.error("Error deleting product:", error)
+      console.error("Error al borrar producto:", error)
 
-      // Check for 404 error which indicates the product has associated sales
       if (error.response && error.response.status === 404) {
-        // Add this product ID to the set of undeletable products
+
         setUndeletableProducts(new Set(undeletableProducts).add(id))
 
-        // Don't show the error message as requested by the user
-        // setError("Cannot delete this product because it has associated sales records.")
       } else {
-        setError("Error deleting product. Please try again later.")
+        setError("Error al borrar. Intentalo mas tarde.")
         setTimeout(() => setError(null), 5000)
       }
     }
   }
 
-  // Toggle product visibility (purely visual, no API calls)
   const toggleVisibility = (id) => {
     setHiddenProducts((prevHidden) => {
       const newHidden = new Set(prevHidden)
@@ -131,7 +123,7 @@ const ProductManager = () => {
       )}
 
       <div className={styles.formSection}>
-        <h2 className={styles.title}>{editingId ? "Edit Product" : "Add New Product"}</h2>
+        <h2 className={styles.title}>{editingId ? "Editar Producto" : "Añadir producto nuevo"}</h2>
         <form className={styles.form} onSubmit={handleSubmit}>
           <input
             type="text"
@@ -150,7 +142,7 @@ const ProductManager = () => {
             required
           />
           <button type="submit" className={styles.button}>
-            {editingId ? "Update Product" : "Add Product"}
+            {editingId ? "Editar Producto" : "Añadir Producto"}
           </button>
           {editingId && (
             <button
@@ -170,9 +162,9 @@ const ProductManager = () => {
       </div>
 
       <div className={styles.listSection}>
-        <h2 className={styles.title}>Product List</h2>
+        <h2 className={styles.title}>Lista de Productos</h2>
         {products.length === 0 ? (
-          <p>No products found. Add your first product!</p>
+          <p>No se encontraron productos. Añade tu primer producto!</p>
         ) : (
           <ul className={styles.productList}>
             {products.map((product) => {
@@ -201,21 +193,21 @@ const ProductManager = () => {
                     <button
                       className={`${styles.iconButton} ${styles.editButton}`}
                       onClick={() => handleEdit(product)}
-                      aria-label="Edit product"
+                      aria-label="Editar producto"
                     >
                       <Edit />
                     </button>
                     <button
                       className={`${styles.iconButton} ${styles.deleteButton}`}
                       onClick={() => handleDelete(product.id)}
-                      aria-label="Delete product"
+                      aria-label="Borrar producto"
                     >
                       <Delete />
                     </button>
                     <button
                       className={`${styles.iconButton} ${isHidden ? styles.visibleButton : styles.invisibleButton}`}
                       onClick={() => toggleVisibility(product.id)}
-                      aria-label={isHidden ? "Make product visible" : "Make product invisible"}
+                      aria-label={isHidden ? "Hacer visible el producto" : "Hacer invisible el producto"}
                     >
                       {isHidden ? <Visibility /> : <VisibilityOff />}
                     </button>

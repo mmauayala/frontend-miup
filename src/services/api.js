@@ -18,7 +18,7 @@ export const emitSessionTimeout = () => {
 }
 
 api.interceptors.request.use((request) => {
-  console.log("Starting Request", JSON.stringify(request, null, 2))
+  console.log("Solicitud de inicio", JSON.stringify(request, null, 2))
   return request
 })
 
@@ -58,7 +58,7 @@ export const login = async (username, password) => {
         const userData = {
           accessToken: responseData.accessToken,
           refreshToken: responseData.refreshToken,
-          expiresIn: responseData["access token expires in"] || responseData.accessTokenExpiresAt,
+          expiresIn: responseData["access token expira en"] || responseData.accessTokenExpiresAt,
           username: username,
           userType: userType,
         }
@@ -96,7 +96,7 @@ export const logout = async () => {
         console.error("Error status:", error.response.status)
         console.error("Error headers:", error.response.headers)
       } else if (error.request) {
-        console.error("No response received:", error.request)
+        console.error("No se recibio respuesta:", error.request)
       } else {
         console.error("Error message:", error.message)
       }
@@ -108,10 +108,10 @@ export const logout = async () => {
 export const register = async (username, password, role = "user") => {
   try {
     const response = await api.post("/usuarios/register", { username, password, role })
-    console.log("Registration response:", response)
+    console.log("Respuesta de registro:", response)
     return response.data
   } catch (error) {
-    console.error("Registration error:", error)
+    console.error("Error al Registrarse:", error)
     if (error.response) {
       console.error("Error data:", error.response.data)
       console.error("Error status:", error.response.status)
@@ -124,16 +124,16 @@ export const refreshToken = async () => {
   const user = getCurrentUser()
   if (user && user.refreshToken) {
     try {
-      console.log("Attempting to refresh token...")
+      console.log("Intentando actualizar el token...")
       const response = await api.post("/autenticacion/usuarios/refresh-token", null, {
         params: { token: user.refreshToken },
       })
 
-      console.log("Token refresh successful:", response.data)
+      console.log("Actualización de tokens exitosa:", response.data)
       const newAccessToken = response.data.accessToken || response.data.response?.accessToken
 
       if (!newAccessToken) {
-        throw new Error("No access token in refresh response")
+        throw new Error("No hay token de acceso en la respuesta de actualización")
       }
 
       // Update the user object with the new token
@@ -142,14 +142,14 @@ export const refreshToken = async () => {
 
       return newAccessToken
     } catch (error) {
-      console.error("Token refresh failed:", error)
+      console.error("Refresh token fallo:", error)
       emitSessionTimeout()
       throw error
     }
   }
-  console.error("No refresh token available")
+  console.error("Refresh token no disponible")
   emitSessionTimeout()
-  throw new Error("No refresh token available")
+  throw new Error("Refresh token no disponible")
 }
 
 api.interceptors.request.use(
@@ -173,7 +173,6 @@ api.interceptors.response.use(
       if (error.response && error.response.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true
 
-        // Instead of automatically refreshing, emit the session timeout event
         if (!originalRequest.url.includes("/refresh-token")) {
           emitSessionTimeout()
           return Promise.reject(error)
@@ -184,8 +183,7 @@ api.interceptors.response.use(
         return api(originalRequest)
       }
     } catch (refreshError) {
-      console.error("Token refresh failed:", refreshError)
-      // Emit session timeout event
+      console.error("Refresh token fallo:", refreshError)
       emitSessionTimeout()
       return Promise.reject(refreshError)
     }
@@ -195,21 +193,17 @@ api.interceptors.response.use(
 
 export const getProducts = async () => {
   try {
-    // Realiza la solicitud HTTP GET
     const response = await api.get("/productos/lista");
 
-    // Devuelve solo el array de productos (content)
     return response.data.content;
   } catch (error) {
     console.error("Error obteniendo productos:", error);
 
-    // Manejo de errores
     if (error.response) {
       console.error("Error data:", error.response.data);
       console.error("Error status:", error.response.status);
     }
 
-    // Lanza el error para que pueda ser manejado por el código que llama a esta función
     throw error;
   }
 }
@@ -380,7 +374,6 @@ export const makeSale = async (saleData) => {
   }
 }
 
-// Add a new function to get product by ID
 export const getProductById = async (productId) => {
   try {
     const response = await api.get(`/productos/${productId}`)
@@ -391,7 +384,6 @@ export const getProductById = async (productId) => {
   }
 }
 
-// Add this new function to get product ID by name
 export const getProductIdByName = async (productName) => {
   try {
     const response = await api.get(`/productos/obtener-id/${encodeURIComponent(productName)}`)
@@ -402,7 +394,6 @@ export const getProductIdByName = async (productName) => {
   }
 }
 
-// Add stock to a product
 export const addStock = async (productId, stockData) => {
   try {
     const response = await api.post(`/productos/${productId}/stock`, stockData)
