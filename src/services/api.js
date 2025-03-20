@@ -1,6 +1,6 @@
 import axios from "axios"
 
-const API_URL = "http://localhost:9191/v1"
+const API_URL = "http://miup-sg.duckdns.org:9191//v1"
 
 const api = axios.create({
   baseURL: API_URL,
