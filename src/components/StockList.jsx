@@ -21,7 +21,6 @@ const StockList = () => {
       setError(null)
     } catch (err) {
       setError("No se pudo obtener la lista de existencias. Inténtelo nuevamente más tarde.")
-      console.error("Error al obtener la lista de existencias:", err)
     } finally {
       setLoading(false)
     }

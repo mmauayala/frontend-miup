@@ -21,7 +21,6 @@ const MovementHistory = () => {
       setError(null)
     } catch (err) {
       setError("No se pudo obtener el historial de movimientos. Inténtalo de nuevo.")
-      console.error("Error al obtener el historial de movimientos:", err)
     } finally {
       setLoading(false)
     }

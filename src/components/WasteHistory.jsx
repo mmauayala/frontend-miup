@@ -28,7 +28,6 @@ const WasteHistory = () => {
       setError(null)
     } catch (err) {
       setError("No se pudieron obtener los productos. Inténtelo nuevamente más tarde.")
-      console.error("Error al obtener los productos:", err)
     }
   }
 
@@ -40,7 +39,6 @@ const WasteHistory = () => {
       setError(null)
     } catch (err) {
       setError("No se pudo obtener el historial de residuos. Inténtelo de nuevo más tarde.")
-      console.error("Error al obtener el historial de residuos:", err)
     } finally {
       setLoading(false)
     }

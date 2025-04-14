@@ -73,7 +73,7 @@ const PromotionsManager = () => {
       })
       fetchPromotions()
     } catch (error) {
-      console.error("Error al crear la promoción:", error)
+      throw error
     }
   }
 
@@ -82,7 +82,7 @@ const PromotionsManager = () => {
       await updatePromotionStatus(id, !activa)
       fetchPromotions()
     } catch (error) {
-      console.error("Error al actualizar el estado de la promoción:", error)
+      throw error
     }
   }
 

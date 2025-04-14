@@ -22,7 +22,6 @@ const EnterWaste = () => {
       setProducts(fetchedProducts)
     } catch (err) {
       setError("No se pudieron obtener los productos. Inténtelo nuevamente más tarde.")
-      console.error("Error obteniendo productos:", err)
     }
   }
 
@@ -47,7 +46,6 @@ const EnterWaste = () => {
       setQuantity("")
     } catch (err) {
       setError("No se pudo ingresar desperdicios. Intenta nuevamente.")
-      console.error("Error al ingresar desperdicio:", err)
     } finally {
       setLoading(false)
     }

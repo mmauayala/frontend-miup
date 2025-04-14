@@ -24,7 +24,6 @@ const ProductManager = () => {
       const fetchedProducts = await getProducts()
       setProducts(fetchedProducts)
     } catch (error) {
-      console.error("Error al buscar productos:", error)
     }
   }
 
@@ -77,7 +76,6 @@ const ProductManager = () => {
       setSuccess("Producto borrado exitosamente")
       setTimeout(() => setSuccess(null), 3000)
     } catch (error) {
-      console.error("Error al borrar producto:", error)
 
       if (error.response && error.response.status === 404) {
 

@@ -24,7 +24,6 @@ const AddStock = () => {
       setProducts(fetchedProducts)
     } catch (err) {
       setError("No se pudieron obtener los productos. Inténtelo nuevamente más tarde.")
-      console.error("Error al obtener los productos:", err)
     }
   }
 
@@ -67,7 +66,6 @@ const AddStock = () => {
       setSalePrice("")
     } catch (err) {
       setError("No se pudo agregar stock. Inténtalo nuevamente.")
-      console.error("Error al agregar stock:", err)
     } finally {
       setLoading(false)
     }

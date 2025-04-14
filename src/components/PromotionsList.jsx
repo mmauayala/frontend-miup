@@ -22,7 +22,6 @@ const PromotionsList = () => {
       setError(null)
     } catch (err) {
       setError("No se pudo obtener la lista de promociones. Inténtalo nuevamente más tarde.")
-      console.error("Error al obtener la lista de promociones:", err)
     } finally {
       setLoading(false)
     }

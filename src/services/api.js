@@ -5,6 +5,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 const api = axios.create({
   baseURL: API_URL,
   headers: {
+    "ngrok-skip-browser-warning": "true", 
     "Content-Type": "application/json",
   },
 })
@@ -12,7 +13,6 @@ const api = axios.create({
 export const SESSION_TIMEOUT_EVENT = "session_timeout"
 
 export const emitSessionTimeout = () => {
-  console.log("Emitting session timeout event")
   const event = new CustomEvent(SESSION_TIMEOUT_EVENT)
   window.dispatchEvent(event)
 }
@@ -46,206 +46,161 @@ export const getUserType = async (username) => {
 
 export const login = async (username, password) => {
   try {
-    const response = await api.post("/autenticacion/usuarios/login", { username, password })
-    console.log("Full login response:", JSON.stringify(response.data, null, 2))
+    const response = await api.post("/autenticacion/usuarios/login", { username, password });
 
-    if (response.data && response.data.isSuccess && response.data.response) {
-      const responseData = response.data.response
-      console.log("Response data:", responseData)
-
-      if (responseData.accessToken && responseData.refreshToken) {
-        const userType = await getUserType(username)
-        const userData = {
-          accessToken: responseData.accessToken,
-          refreshToken: responseData.refreshToken,
-          expiresIn: responseData["access token expira en"] || responseData.accessTokenExpiresAt,
-          username: username,
-          userType: userType,
-        }
-
-        localStorage.setItem("user", JSON.stringify(userData))
-
-        return userData
-      } else {
-        console.error("Error de inicio de sesión: faltan tokens en la respuesta")
-        throw new Error("Error de inicio de sesión: faltan tokens en la respuesta")
-      }
-    } else {
-      console.error("Error de inicio de sesión: formato de respuesta no válido", response.data)
-      throw new Error("Error de inicio de sesión: formato de respuesta no válido")
+    if (!response.data || !response.data.isSuccess || !response.data.response) {
+      throw new Error("Error de inicio de sesión: formato de respuesta no válido");
     }
+
+    const responseData = response.data.response;
+    if (!responseData.accessToken || !responseData.refreshToken) {
+      throw new Error("Error de inicio de sesión: faltan tokens en la respuesta");
+    }
+
+    const userType = await getUserType(username);
+    const userData = {
+      accessToken: responseData.accessToken,
+      refreshToken: responseData.refreshToken,
+      expiresIn: responseData["access token expira en"] || responseData.accessTokenExpiresAt,
+      username: username,
+      userType: userType,
+    };
+
+    localStorage.setItem("user", JSON.stringify(userData));
+    return userData;
+
   } catch (error) {
-    console.error("Login error:", error)
-    throw error
+    throw error;
   }
 }
 
 export const logout = async () => {
-  const user = getCurrentUser()
-  if (user) {
-    try {
-      const response = await api.post("/autenticacion/usuarios/logout", {
-        accessToken: user.accessToken,
-        refreshToken: user.refreshToken,
-      })
-      console.log("Logout response:", response)
-    } catch (error) {
-      console.error("Logout error:", error)
-      if (error.response) {
-        console.error("Error data:", error.response.data)
-        console.error("Error status:", error.response.status)
-        console.error("Error headers:", error.response.headers)
-      } else if (error.request) {
-        console.error("No se recibio respuesta:", error.request)
-      } else {
-        console.error("Error message:", error.message)
-      }
-    }
+  const user = getCurrentUser();
+  if (!user) return;
+
+  try {
+    await api.post("/autenticacion/usuarios/logout", {
+      accessToken: user.accessToken,
+      refreshToken: user.refreshToken,
+    });
+  } catch (error) {
+    console.error("Logout error:", {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+    });
+  } finally {
+    localStorage.removeItem("user");
   }
-  localStorage.removeItem("user")
 }
 
 export const register = async (username, password, role = "user") => {
   try {
-    const response = await api.post("/usuarios/register", { username, password, role })
-    console.log("Respuesta de registro:", response)
-    return response.data
+    const response = await api.post("/usuarios/register", { username, password, role });
+    return response.data;
   } catch (error) {
-    console.error("Error al Registrarse:", error)
-    if (error.response) {
-      console.error("Error data:", error.response.data)
-      console.error("Error status:", error.response.status)
-    }
-    throw error
+    throw error;
   }
 }
 
 export const refreshToken = async () => {
-  const user = getCurrentUser()
-  if (user && user.refreshToken) {
-    try {
-      console.log("Intentando actualizar el token...")
-      const response = await api.post("/autenticacion/usuarios/refresh-token", null, {
-        params: { token: user.refreshToken },
-      })
-
-      console.log("Actualización de tokens exitosa:", response.data)
-      const newAccessToken = response.data.accessToken || response.data.response?.accessToken
-
-      if (!newAccessToken) {
-        throw new Error("No hay token de acceso en la respuesta de actualización")
-      }
-
-      // Update the user object with the new token
-      user.accessToken = newAccessToken
-      localStorage.setItem("user", JSON.stringify(user))
-
-      return newAccessToken
-    } catch (error) {
-      console.error("Refresh token fallo:", error)
-      emitSessionTimeout()
-      throw error
-    }
+  const user = getCurrentUser();
+  if (!user?.refreshToken) {
+    emitSessionTimeout();
+    throw new Error("Refresh token no disponible");
   }
-  console.error("Refresh token no disponible")
-  emitSessionTimeout()
-  throw new Error("Refresh token no disponible")
+
+  try {
+    const response = await api.post("/autenticacion/usuarios/refresh-token", null, {
+      params: { token: user.refreshToken },
+    });
+
+    const newAccessToken = response.data.accessToken || response.data.response?.accessToken;
+    if (!newAccessToken) {
+      throw new Error("No hay token de acceso en la respuesta");
+    }
+
+    user.accessToken = newAccessToken;
+    localStorage.setItem("user", JSON.stringify(user));
+    return newAccessToken;
+
+  } catch (error) {
+    emitSessionTimeout();
+    throw error;
+  }
 }
 
 api.interceptors.request.use(
   (config) => {
-    const user = getCurrentUser()
-    if (user && user.accessToken) {
-      config.headers["Authorization"] = "Bearer " + user.accessToken
+    const user = getCurrentUser();
+    if (user?.accessToken) {
+      config.headers.Authorization = `Bearer ${user.accessToken}`;
     }
-    return config
+    return config;
   },
-  (error) => {
-    return Promise.reject(error)
-  },
+  (error) => Promise.reject(error)
 )
 
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const originalRequest = error.config
-    try {
-      if (error.response && error.response.status === 401 && !originalRequest._retry) {
-        originalRequest._retry = true
+    const originalRequest = error.config;
+    
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
 
-        if (!originalRequest.url.includes("/refresh-token")) {
-          emitSessionTimeout()
-          return Promise.reject(error)
+      if (!originalRequest.url.includes("/refresh-token")) {
+        try {
+          const newAccessToken = await refreshToken();
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+          return api(originalRequest);
+        } catch (refreshError) {
+          emitSessionTimeout();
+          return Promise.reject(refreshError);
         }
-
-        const newAccessToken = await refreshToken()
-        originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`
-        return api(originalRequest)
       }
-    } catch (refreshError) {
-      console.error("Refresh token fallo:", refreshError)
-      emitSessionTimeout()
-      return Promise.reject(refreshError)
     }
-    return Promise.reject(error)
-  },
+
+    return Promise.reject(error);
+  }
 )
 
 export const getProducts = async () => {
   try {
     const response = await api.get("/productos/lista");
-
     return response.data.content;
   } catch (error) {
-    console.error("Error obteniendo productos:", error);
-
-    if (error.response) {
-      console.error("Error data:", error.response.data);
-      console.error("Error status:", error.response.status);
-    }
-
-    throw error;
+    throw error; 
   }
 }
 
 export const getStockList = async () => {
   try {
-    const response = await api.get("/productos/lista/stock")
+    const response = await api.get("/productos/lista/stock");
     return response.data.map((item) => ({
-      ...item,
-      producto: item.producto.name,
-    }))
+      ...item,  
+      producto: item.producto?.name || item.producto,  
+    }));
   } catch (error) {
-    console.error("Error obteniendo lista de existencias:", error)
-    if (error.response) {
-      console.error("Error data:", error.response.data)
-      console.error("Error status:", error.response.status)
-    }
-    throw error
+    throw error;  
   }
 }
 
 export const getMovementHistory = async () => {
   try {
-    const response = await api.get("/productos/movimientos")
-    return response.data
+    const response = await api.get("/productos/movimientos");
+    return response.data; 
   } catch (error) {
-    console.error("Error obteniendo historial de movimientos:", error)
-    if (error.response) {
-      console.error("Error data:", error.response.data)
-      console.error("Error status:", error.response.status)
-    }
-    throw error
+    throw error; 
   }
 }
 
 export const createProduct = async (productData) => {
   try {
-    const response = await api.post("/productos/create", productData)
-    return response.data
+    const response = await api.post("/productos/create", productData);
+    return response.data; 
   } catch (error) {
-    console.error("Error al crear el producto:", error)
-    throw error
+    throw error; 
   }
 }
 
@@ -254,7 +209,6 @@ export const updateProduct = async (id, productData) => {
     const response = await api.put(`/productos/${id}`, productData)
     return response.data
   } catch (error) {
-    console.error("Error al editar el producto:", error)
     throw error
   }
 }
@@ -264,7 +218,6 @@ export const deleteProduct = async (id) => {
     const response = await api.delete(`/productos/${id}`)
     return response.data
   } catch (error) {
-    console.error("Error al borrar el producto:", error)
     throw error
   }
 }
@@ -277,11 +230,6 @@ export const getPromotionsList = async () => {
       producto: promotion.producto.name,
     }))
   } catch (error) {
-    console.error("Error al obtener la lista de promociones:", error)
-    if (error.response) {
-      console.error("Error data:", error.response.data)
-      console.error("Error status:", error.response.status)
-    }
     throw error
   }
 }
@@ -294,11 +242,6 @@ export const getWasteHistory = async (productId) => {
       producto: waste.producto.name,
     }))
   } catch (error) {
-    console.error("Error al obtener el historial de residuos:", error)
-    if (error.response) {
-      console.error("Error data:", error.response.data)
-      console.error("Error status:", error.response.status)
-    }
     throw error
   }
 }
@@ -311,11 +254,6 @@ export const enterWaste = async (productId, cantidad) => {
       producto: response.data.producto.name
     }
   } catch (error) {
-    console.error("Error al introducir los residuos:", error)
-    if (error.response) {
-      console.error("Error data:", error.response.data)
-      console.error("Error status:", error.response.status)
-    }
     throw error
   }
 }
@@ -328,11 +266,6 @@ export const createPromotion = async (promotionData) => {
       producto: response.data.producto.name,
     }
   } catch (error) {
-    console.error("Error al crear la promoción:", error)
-    if (error.response) {
-      console.error("Error data:", error.response.data)
-      console.error("Error status:", error.response.status)
-    }
     throw error
   }
 }
@@ -345,11 +278,6 @@ export const updatePromotionStatus = async (id, activa) => {
       producto: response.data.producto.name,
     }
   } catch (error) {
-    console.error("Error al actualizar el estado de la promoción:", error)
-    if (error.response) {
-      console.error("Error data:", error.response.data)
-      console.error("Error status:", error.response.status)
-    }
     throw error
   }
 }
@@ -357,19 +285,8 @@ export const updatePromotionStatus = async (id, activa) => {
 export const makeSale = async (saleData) => {
   try {
     const response = await api.post("/productos/venta", saleData)
-    console.log("Respuesta de la venta:", JSON.stringify(response.data, null, 2))
     return response.data
   } catch (error) {
-    console.error("Error al realizar la venta:", error)
-    if (error.response) {
-      console.error("Error response:", JSON.stringify(error.response.data, null, 2))
-      console.error("Error status:", error.response.status)
-      console.error("Error headers:", JSON.stringify(error.response.headers, null, 2))
-    } else if (error.request) {
-      console.error("No se recibió respuesta:", error.request)
-    } else {
-      console.error("Error details:", error.message)
-    }
     throw error
   }
 }
@@ -379,7 +296,6 @@ export const getProductById = async (productId) => {
     const response = await api.get(`/productos/${productId}`)
     return response.data
   } catch (error) {
-    console.error(`Error al obtener el ID del producto para ${productId}:`, error)
     throw error
   }
 }
@@ -389,7 +305,6 @@ export const getProductIdByName = async (productName) => {
     const response = await api.get(`/productos/obtener-id/${encodeURIComponent(productName)}`)
     return response.data.id
   } catch (error) {
-    console.error(`Error al obtener el ID del producto para ${productName}:`, error)
     throw error
   }
 }
@@ -402,11 +317,6 @@ export const addStock = async (productId, stockData) => {
       producto: response.data.producto.name,
     }
   } catch (error) {
-    console.error(`Error al agregar stock al producto ${productId}:`, error)
-    if (error.response) {
-      console.error("Error data:", error.response.data)
-      console.error("Error status:", error.response.status)
-    }
     throw error
   }
 }

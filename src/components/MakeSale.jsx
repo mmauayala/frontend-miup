@@ -56,7 +56,7 @@ const MakeSale = () => {
       const promotionsList = await getPromotionsList()
       setPromotions(promotionsList)
     } catch (error) {
-      console.error("Error al obtener promociones:", error)
+      throw error
     }
   }
 
@@ -218,43 +218,29 @@ const MakeSale = () => {
         }
       }
 
-      console.log("Datos de venta antes de la llamada a la API:", JSON.stringify(formattedSaleData, null, 2))
       const result = await makeSale(formattedSaleData)
-      console.log("Resultado de la venta:", JSON.stringify(result, null, 2))
-      console.log("Detalles del carrito:", JSON.stringify(cartDetails, null, 2))
-
-      console.log("Creación de información de venta a partir de la respuesta:", JSON.stringify(result, null, 2))
-      console.log("Uso de los detalles del carrito:", JSON.stringify(cartDetails, null, 2))
 
       if (result && Array.isArray(result) && result.length > 0) {
         setSaleInfoDialog({ open: true, saleInfo: result })
         setCart({})
         fetchProducts()
       } else if (result && typeof result === "object" && Object.keys(result).length > 0) {
-        console.log("Formato de respuesta inesperada:", result)
         setSnackbar({
           open: true,
           message: "Formato de respuesta inesperado del servidor",
           severity: "advertencia",
         })
       } else {
-        console.error("Respuesta vacía o inválida del servidor")
         throw new Error("Respuesta vacía o inválida del servidor")
       }
     } catch (error) {
-      console.error("Error making sale:", error)
-      let errorMessage = "Error making sale"
-      if (error.response) {
-        console.error("Error response:", JSON.stringify(error.response.data, null, 2))
-        errorMessage = error.response.data.message || errorMessage
-      } else if (error.request) {
-        console.error("No response received:", error.request)
-      } else {
-        console.error("Error details:", error.message)
+      let errorMessage = "Error al procesar la venta";
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
       }
-      setSnackbar({ open: true, message: errorMessage, severity: "error" })
+      setSnackbar({ open: true, message: errorMessage, severity: "error" });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 

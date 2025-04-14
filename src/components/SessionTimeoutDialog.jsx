@@ -16,25 +16,20 @@ const SessionTimeoutDialog = () => {
       setIsOpen(false)
       setCountdown(60)
     } catch (error) {
-      console.error("No se pudo actualizar el token:", error)
       handleLogout()
     } finally {
       setIsRefreshing(false)
     }
   }, [])
 
-  // Function to handle logout
   const handleLogout = useCallback(async () => {
     try {
       await logout()
     } catch (error) {
-      console.error("Error durante el cierre de sesión:", error)
-    } finally {
       window.location.href = "/login"
     }
   }, [])
 
-  // Listen for session timeout event
   useEffect(() => {
     const handleSessionTimeout = () => {
       console.log("Session timeout detected")

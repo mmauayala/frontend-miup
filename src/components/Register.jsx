@@ -16,7 +16,7 @@ const Register = () => {
       await register(username, password)
       navigate("/login")
     } catch (error) {
-      console.error("El registro falló:", error)
+      throw error
     }
   }
 
